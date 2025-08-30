@@ -2,41 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Professional Medical/Scientific Design System for Precision Cavity Analyzer
+All colors MUST be HSL for consistency and theming support.
 */
 
 @layer base {
   :root {
+    /* Core backgrounds and text */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 210 20% 15%;
 
+    /* Card and surface colors */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 210 20% 15%;
+    --surface: 210 20% 98%;
+    --surface-foreground: 210 20% 25%;
 
+    /* Popover colors */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 210 20% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary brand colors - Medical Blue */
+    --primary: 210 100% 45%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 210 100% 55%;
+    --primary-dark: 210 100% 35%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary colors - Professional Gray */
+    --secondary: 210 15% 95%;
+    --secondary-foreground: 210 20% 25%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted colors */
+    --muted: 210 15% 96%;
+    --muted-foreground: 210 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent colors - Scientific Teal */
+    --accent: 180 65% 45%;
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 180 65% 55%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Status colors */
+    --success: 140 70% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 45 90% 55%;
+    --warning-foreground: 0 0% 15%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Heatmap colors for deviation analysis */
+    --heatmap-low: 140 65% 45%;      /* Green for low deviation */
+    --heatmap-medium: 45 90% 55%;     /* Yellow for medium deviation */
+    --heatmap-high: 320 75% 55%;      /* Magenta for high deviation */
+    --heatmap-critical: 0 75% 55%;    /* Red for critical deviation */
 
-    --radius: 0.5rem;
+    /* Border and input colors */
+    --border: 210 20% 88%;
+    --input: 210 20% 96%;
+    --ring: 210 100% 45%;
+
+    /* Radius system */
+    --radius: 0.75rem;
+    --radius-sm: 0.5rem;
+    --radius-lg: 1rem;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(210 20% 0% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(210 20% 0% / 0.1), 0 2px 4px -1px hsl(210 20% 0% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(210 20% 0% / 0.1), 0 4px 6px -2px hsl(210 20% 0% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(210 20% 0% / 0.1), 0 10px 10px -5px hsl(210 20% 0% / 0.04);
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
+    --gradient-surface: linear-gradient(180deg, hsl(var(--background)), hsl(var(--surface)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent-light)));
+
+    /* Animation timing */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease-out;
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +142,85 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Professional medical/scientific styling */
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid hsl(var(--border));
+  }
+
+  .heatmap-gradient {
+    background: linear-gradient(90deg, 
+      hsl(var(--heatmap-low)) 0%, 
+      hsl(var(--heatmap-medium)) 50%, 
+      hsl(var(--heatmap-high)) 75%,
+      hsl(var(--heatmap-critical)) 100%
+    );
+  }
+
+  /* 3D viewer container styles */
+  .viewer-container {
+    background: hsl(var(--surface));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Professional button variants */
+  .btn-medical {
+    background: var(--gradient-primary);
+    color: hsl(var(--primary-foreground));
+    border: none;
+    transition: var(--transition-smooth);
+  }
+
+  .btn-medical:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* File upload area styling */
+  .upload-zone {
+    border: 2px dashed hsl(var(--border));
+    background: hsl(var(--surface));
+    transition: var(--transition-fast);
+  }
+
+  .upload-zone:hover {
+    border-color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.05);
+  }
+
+  .upload-zone.drag-over {
+    border-color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.1);
+  }
+
+  /* Metrics table styling */
+  .metrics-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+  }
+
+  .metrics-table th {
+    background: hsl(var(--surface));
+    font-weight: 600;
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .metrics-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .metrics-table tr:last-child td {
+    border-bottom: none;
   }
 }
