@@ -48,6 +48,44 @@ export const STLViewer: React.FC<STLViewerProps> = ({
   const [showQuery, setShowQuery] = useState(true);
   const [loadingSTL, setLoadingSTL] = useState(false);
 
+  // Calculate mesh deviations for heatmap
+  const calculateMeshDeviations = (queryGeometry: THREE.BufferGeometry, referenceGeometry?: THREE.BufferGeometry): number[] => {
+    if (!referenceGeometry) return [];
+    
+    const queryPositions = queryGeometry.attributes.position.array;
+    const referencePositions = referenceGeometry.attributes.position.array;
+    const deviations: number[] = [];
+    
+    // For each vertex in the query mesh, find the closest vertex in the reference mesh
+    for (let i = 0; i < queryPositions.length; i += 3) {
+      const queryVertex = new THREE.Vector3(
+        queryPositions[i],
+        queryPositions[i + 1],
+        queryPositions[i + 2]
+      );
+      
+      let minDistance = Infinity;
+      
+      // Find closest point in reference mesh
+      for (let j = 0; j < referencePositions.length; j += 3) {
+        const refVertex = new THREE.Vector3(
+          referencePositions[j],
+          referencePositions[j + 1],
+          referencePositions[j + 2]
+        );
+        
+        const distance = queryVertex.distanceTo(refVertex);
+        if (distance < minDistance) {
+          minDistance = distance;
+        }
+      }
+      
+      deviations.push(minDistance);
+    }
+    
+    return deviations;
+  };
+
   // Initialize Three.js scene and STL loader
   useEffect(() => {
     if (!containerRef.current) return;
@@ -191,18 +229,24 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         try {
           const geometry = stlLoaderRef.current!.parse(arrayBuffer);
           
-          // Center and normalize geometry
+          // Store original geometry for deviation calculation
+          const originalGeometry = geometry.clone();
+          
+          // Center and normalize geometry for consistent superimposition
           geometry.computeBoundingBox();
           const boundingBox = geometry.boundingBox!;
           const center = new THREE.Vector3();
           boundingBox.getCenter(center);
+          
+          // Store centering transformation
+          const centerOffset = center.clone();
           geometry.translate(-center.x, -center.y, -center.z);
           
-          // Scale to reasonable size
+          // Scale both models to the same size for proper superimposition
           const size = new THREE.Vector3();
           boundingBox.getSize(size);
           const maxDimension = Math.max(size.x, size.y, size.z);
-          const scale = 2 / maxDimension; // Scale to fit in 2 unit cube
+          const scale = 3 / maxDimension; // Scale to fit in 3 unit cube for better visibility
           geometry.scale(scale, scale, scale);
           
           // Compute normals for proper lighting
@@ -220,28 +264,33 @@ export const STLViewer: React.FC<STLViewerProps> = ({
             });
           } else {
             if (analysisComplete && showHeatmap) {
-              // Create vertex colors for heatmap
+              // Calculate actual deviations between meshes
+              const deviations = calculateMeshDeviations(geometry, loadedMeshesRef.current.reference?.geometry);
+              
+              // Create vertex colors for heatmap based on actual deviations
               const colors = new Float32Array(geometry.attributes.position.count * 3);
               for (let i = 0; i < colors.length; i += 3) {
-                // Simulate heatmap coloring based on vertex position
                 const vertex = i / 3;
-                const heatValue = Math.random(); // In real implementation, this would be actual deviation data
+                const deviation = deviations[vertex] || 0;
                 
-                if (heatValue < 0.25) {
+                // Normalize deviation to 0-1 range (assuming max deviation of 2.0 units)
+                const normalizedDeviation = Math.min(deviation / 2.0, 1.0);
+                
+                if (normalizedDeviation < 0.2) {
                   // Low deviation - Green
                   colors[i] = 0.0;     // R
                   colors[i + 1] = 1.0; // G
                   colors[i + 2] = 0.0; // B
-                } else if (heatValue < 0.5) {
+                } else if (normalizedDeviation < 0.4) {
                   // Medium deviation - Yellow
                   colors[i] = 1.0;     // R
                   colors[i + 1] = 1.0; // G
                   colors[i + 2] = 0.0; // B
-                } else if (heatValue < 0.75) {
-                  // High deviation - Magenta
+                } else if (normalizedDeviation < 0.7) {
+                  // High deviation - Orange
                   colors[i] = 1.0;     // R
-                  colors[i + 1] = 0.0; // G
-                  colors[i + 2] = 1.0; // B
+                  colors[i + 1] = 0.5; // G
+                  colors[i + 2] = 0.0; // B
                 } else {
                   // Critical deviation - Red
                   colors[i] = 1.0;     // R
@@ -275,12 +324,20 @@ export const STLViewer: React.FC<STLViewerProps> = ({
           mesh.userData.type = type;
           mesh.userData.fileName = file.name;
           
-          // Position models side by side when not superimposed
+          // Store geometry for deviation calculation
+          mesh.userData.originalGeometry = originalGeometry;
+          mesh.userData.scale = scale;
+          mesh.userData.centerOffset = centerOffset;
+          
+          // Position models for proper superimposition
           if (!analysisComplete) {
-            mesh.position.set(type === 'reference' ? -1.2 : 1.2, 0, 0);
+            // Side by side for comparison view
+            mesh.position.set(type === 'reference' ? -2 : 2, 0, 0);
           } else {
-            // When analysis is complete, position for superimposition
+            // Exact same position for superimposition
             mesh.position.set(0, 0, 0);
+            // Apply same rotation for alignment
+            mesh.rotation.set(0, 0, 0);
           }
           
           resolve(mesh);
