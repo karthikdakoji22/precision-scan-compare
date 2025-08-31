@@ -175,7 +175,7 @@ export const STLViewer: React.FC<STLViewerProps> = ({
   }, []);
 
   // STL File Loading and Display System
-  const loadSTLFile = async (file: File, type: 'reference' | 'query'): Promise<THREE.Mesh | null> => {
+  const loadSTLFile = async (file: File, type: 'reference' | 'query'): Promise<{ geometry: THREE.BufferGeometry, originalGeometry: THREE.BufferGeometry } | null> => {
     if (!stlLoaderRef.current) return null;
 
     return new Promise((resolve, reject) => {
@@ -189,7 +189,8 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         }
 
         try {
-          const geometry = stlLoaderRef.current!.parse(arrayBuffer);
+          const originalGeometry = stlLoaderRef.current!.parse(arrayBuffer);
+          const geometry = originalGeometry.clone();
           
           // Center and normalize geometry
           geometry.computeBoundingBox();
@@ -208,82 +209,7 @@ export const STLViewer: React.FC<STLViewerProps> = ({
           // Compute normals for proper lighting
           geometry.computeVertexNormals();
           
-          // Create material based on type and analysis state
-          let material;
-          if (type === 'reference') {
-            material = new THREE.MeshPhongMaterial({
-              color: analysisComplete && showHeatmap ? 0x00ff88 : 0x4ade80,
-              transparent: true,
-              opacity: 0.85,
-              wireframe: showWireframe,
-              side: THREE.DoubleSide
-            });
-          } else {
-            if (analysisComplete && showHeatmap) {
-              // Create vertex colors for heatmap
-              const colors = new Float32Array(geometry.attributes.position.count * 3);
-              for (let i = 0; i < colors.length; i += 3) {
-                // Simulate heatmap coloring based on vertex position
-                const vertex = i / 3;
-                const heatValue = Math.random(); // In real implementation, this would be actual deviation data
-                
-                if (heatValue < 0.25) {
-                  // Low deviation - Green
-                  colors[i] = 0.0;     // R
-                  colors[i + 1] = 1.0; // G
-                  colors[i + 2] = 0.0; // B
-                } else if (heatValue < 0.5) {
-                  // Medium deviation - Yellow
-                  colors[i] = 1.0;     // R
-                  colors[i + 1] = 1.0; // G
-                  colors[i + 2] = 0.0; // B
-                } else if (heatValue < 0.75) {
-                  // High deviation - Magenta
-                  colors[i] = 1.0;     // R
-                  colors[i + 1] = 0.0; // G
-                  colors[i + 2] = 1.0; // B
-                } else {
-                  // Critical deviation - Red
-                  colors[i] = 1.0;     // R
-                  colors[i + 1] = 0.0; // G
-                  colors[i + 2] = 0.0; // B
-                }
-              }
-              
-              geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-              
-              material = new THREE.MeshPhongMaterial({
-                vertexColors: true,
-                transparent: true,
-                opacity: 0.9,
-                wireframe: showWireframe,
-                side: THREE.DoubleSide
-              });
-            } else {
-              material = new THREE.MeshPhongMaterial({
-                color: 0x3b82f6,
-                transparent: true,
-                opacity: 0.85,
-                wireframe: showWireframe,
-                side: THREE.DoubleSide
-              });
-            }
-          }
-          
-          const mesh = new THREE.Mesh(geometry, material);
-          mesh.userData.isSTLModel = true;
-          mesh.userData.type = type;
-          mesh.userData.fileName = file.name;
-          
-          // Position models side by side when not superimposed
-          if (!analysisComplete) {
-            mesh.position.set(type === 'reference' ? -1.2 : 1.2, 0, 0);
-          } else {
-            // When analysis is complete, position for superimposition
-            mesh.position.set(0, 0, 0);
-          }
-          
-          resolve(mesh);
+          resolve({ geometry, originalGeometry });
         } catch (error) {
           reject(error);
         }
@@ -293,6 +219,126 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       reader.readAsArrayBuffer(file);
     });
   };
+
+  // Calculate actual deviation between two geometries for heatmap
+  const calculateMeshDeviations = (queryGeometry: THREE.BufferGeometry, referenceGeometry: THREE.BufferGeometry): Float32Array => {
+    const queryPositions = queryGeometry.attributes.position.array as Float32Array;
+    const referencePositions = referenceGeometry.attributes.position.array as Float32Array;
+    const deviations = new Float32Array(queryPositions.length / 3);
+    
+    // For each vertex in query mesh, find closest point on reference mesh
+    for (let i = 0; i < queryPositions.length; i += 3) {
+      const queryVertex = new THREE.Vector3(
+        queryPositions[i],
+        queryPositions[i + 1],
+        queryPositions[i + 2]
+      );
+      
+      let minDistance = Infinity;
+      
+      // Compare with all vertices in reference mesh to find minimum distance
+      for (let j = 0; j < referencePositions.length; j += 3) {
+        const refVertex = new THREE.Vector3(
+          referencePositions[j],
+          referencePositions[j + 1],
+          referencePositions[j + 2]
+        );
+        
+        const distance = queryVertex.distanceTo(refVertex);
+        if (distance < minDistance) {
+          minDistance = distance;
+        }
+      }
+      
+      deviations[i / 3] = minDistance;
+    }
+    
+    return deviations;
+  };
+
+  // Create merged superimposed mesh with heatmap
+  const createSuperimposedMesh = (
+    referenceGeometry: THREE.BufferGeometry,
+    queryGeometry: THREE.BufferGeometry
+  ): THREE.Mesh => {
+    // Use query geometry as base and apply heatmap colors based on deviations
+    const mergedGeometry = queryGeometry.clone();
+    
+    if (showHeatmap) {
+      // Calculate deviations between the two meshes
+      const deviations = calculateMeshDeviations(queryGeometry, referenceGeometry);
+      
+      // Create vertex colors based on deviations
+      const colors = new Float32Array(mergedGeometry.attributes.position.count * 3);
+      const maxDeviation = Math.max(...deviations);
+      
+      for (let i = 0; i < deviations.length; i++) {
+        const normalizedDeviation = deviations[i] / (maxDeviation || 1);
+        const colorIndex = i * 3;
+        
+        if (normalizedDeviation < 0.25) {
+          // Low deviation - Green
+          colors[colorIndex] = 0.0;     // R
+          colors[colorIndex + 1] = 1.0; // G
+          colors[colorIndex + 2] = 0.0; // B
+        } else if (normalizedDeviation < 0.5) {
+          // Medium deviation - Yellow
+          colors[colorIndex] = 1.0;     // R
+          colors[colorIndex + 1] = 1.0; // G
+          colors[colorIndex + 2] = 0.0; // B
+        } else if (normalizedDeviation < 0.75) {
+          // High deviation - Orange
+          colors[colorIndex] = 1.0;     // R
+          colors[colorIndex + 1] = 0.5; // G
+          colors[colorIndex + 2] = 0.0; // B
+        } else {
+          // Critical deviation - Red
+          colors[colorIndex] = 1.0;     // R
+          colors[colorIndex + 1] = 0.0; // G
+          colors[colorIndex + 2] = 0.0; // B
+        }
+      }
+      
+      mergedGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      
+      const material = new THREE.MeshPhongMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.9,
+        wireframe: showWireframe,
+        side: THREE.DoubleSide
+      });
+      
+      const mesh = new THREE.Mesh(mergedGeometry, material);
+      mesh.position.set(0, 0, 0);
+      mesh.userData.isSTLModel = true;
+      mesh.userData.type = 'superimposed';
+      
+      return mesh;
+    } else {
+      // Show merged model without heatmap
+      const material = new THREE.MeshPhongMaterial({
+        color: 0x8b5cf6,
+        transparent: true,
+        opacity: 0.8,
+        wireframe: showWireframe,
+        side: THREE.DoubleSide
+      });
+      
+      const mesh = new THREE.Mesh(mergedGeometry, material);
+      mesh.position.set(0, 0, 0);
+      mesh.userData.isSTLModel = true;
+      mesh.userData.type = 'superimposed';
+      
+      return mesh;
+    }
+  };
+
+  // Store loaded geometries for superimposition
+  const loadedGeometriesRef = useRef<{
+    reference?: THREE.BufferGeometry;
+    query?: THREE.BufferGeometry;
+  }>({});
 
   // Load and display STL files when they change
   useEffect(() => {
@@ -322,50 +368,82 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       
       // Clear loaded meshes reference
       loadedMeshesRef.current = {};
+      loadedGeometriesRef.current = {};
 
       try {
+        let referenceGeometry: THREE.BufferGeometry | null = null;
+        let queryGeometry: THREE.BufferGeometry | null = null;
+
         // Load reference file
-        if (referenceFile && showReference) {
-          const referenceMesh = await loadSTLFile(referenceFile, 'reference');
-          if (referenceMesh) {
-            loadedMeshesRef.current.reference = referenceMesh;
-            sceneRef.current!.add(referenceMesh);
+        if (referenceFile) {
+          const refData = await loadSTLFile(referenceFile, 'reference');
+          if (refData) {
+            referenceGeometry = refData.geometry;
+            loadedGeometriesRef.current.reference = refData.geometry;
+            
+            if (!analysisComplete) {
+              // Show reference model separately before analysis
+              const material = new THREE.MeshPhongMaterial({
+                color: 0x4ade80,
+                transparent: true,
+                opacity: 0.85,
+                wireframe: showWireframe,
+                side: THREE.DoubleSide
+              });
+              
+              const mesh = new THREE.Mesh(referenceGeometry, material);
+              mesh.position.set(-1.2, 0, 0);
+              mesh.userData.isSTLModel = true;
+              mesh.userData.type = 'reference';
+              mesh.userData.fileName = referenceFile.name;
+              mesh.visible = showReference;
+              
+              loadedMeshesRef.current.reference = mesh;
+              sceneRef.current!.add(mesh);
+            }
           }
         }
 
         // Load query file
-        if (queryFile && showQuery) {
-          const queryMesh = await loadSTLFile(queryFile, 'query');
-          if (queryMesh) {
-            loadedMeshesRef.current.query = queryMesh;
-            sceneRef.current!.add(queryMesh);
+        if (queryFile) {
+          const queryData = await loadSTLFile(queryFile, 'query');
+          if (queryData) {
+            queryGeometry = queryData.geometry;
+            loadedGeometriesRef.current.query = queryData.geometry;
+            
+            if (!analysisComplete) {
+              // Show query model separately before analysis
+              const material = new THREE.MeshPhongMaterial({
+                color: 0x3b82f6,
+                transparent: true,
+                opacity: 0.85,
+                wireframe: showWireframe,
+                side: THREE.DoubleSide
+              });
+              
+              const mesh = new THREE.Mesh(queryGeometry, material);
+              mesh.position.set(1.2, 0, 0);
+              mesh.userData.isSTLModel = true;
+              mesh.userData.type = 'query';
+              mesh.userData.fileName = queryFile.name;
+              mesh.visible = showQuery;
+              
+              loadedMeshesRef.current.query = mesh;
+              sceneRef.current!.add(mesh);
+            }
           }
         }
 
-        // Create superimposed model when analysis is complete
-        if (analysisComplete && referenceFile && queryFile && loadedMeshesRef.current.reference) {
-          const superimposedGeometry = loadedMeshesRef.current.reference.geometry.clone();
-          
-          // Create heatmap material for superimposed model
-          const material = new THREE.MeshPhongMaterial({
-            color: showHeatmap ? 0x00ff88 : 0x8b5cf6,
-            transparent: true,
-            opacity: 0.6,
-            wireframe: showWireframe,
-            side: THREE.DoubleSide
-          });
-          
-          const superimposedMesh = new THREE.Mesh(superimposedGeometry, material);
-          superimposedMesh.position.set(0, 0, 0);
-          superimposedMesh.userData.isSTLModel = true;
-          superimposedMesh.userData.type = 'superimposed';
-          
+        // Create superimposed merged model when analysis is complete
+        if (analysisComplete && referenceGeometry && queryGeometry) {
+          // Hide individual models during superimposition
+          const superimposedMesh = createSuperimposedMesh(referenceGeometry, queryGeometry);
           loadedMeshesRef.current.superimposed = superimposedMesh;
           sceneRef.current!.add(superimposedMesh);
         }
 
         // Auto-adjust camera to fit models
-        if (loadedMeshesRef.current.reference || loadedMeshesRef.current.query) {
+        if (referenceGeometry || queryGeometry) {
           const box = new THREE.Box3();
           
           if (loadedMeshesRef.current.reference) {
@@ -373,6 +451,9 @@ export const STLViewer: React.FC<STLViewerProps> = ({
           }
           if (loadedMeshesRef.current.query) {
             box.expandByObject(loadedMeshesRef.current.query);
+          }
+          if (loadedMeshesRef.current.superimposed) {
+            box.expandByObject(loadedMeshesRef.current.superimposed);
           }
           
           const size = box.getSize(new THREE.Vector3());
@@ -387,16 +468,6 @@ export const STLViewer: React.FC<STLViewerProps> = ({
 
       } catch (error) {
         console.error('Error loading STL files:', error);
-        // Fallback to simple geometry if STL loading fails
-        if (referenceFile && showReference) {
-          const fallbackGeometry = new THREE.BoxGeometry(1, 1, 1);
-          const fallbackMaterial = new THREE.MeshPhongMaterial({ color: 0x4ade80, transparent: true, opacity: 0.8 });
-          const fallbackMesh = new THREE.Mesh(fallbackGeometry, fallbackMaterial);
-          fallbackMesh.position.set(-1.2, 0, 0);
-          fallbackMesh.userData.isSTLModel = true;
-          fallbackMesh.userData.type = 'reference';
-          sceneRef.current!.add(fallbackMesh);
-        }
       } finally {
         setLoadingSTL(false);
       }
