@@ -259,7 +259,7 @@ export const STLViewer: React.FC<STLViewerProps> = ({
     });
   };
 
-  // Advanced Mesh Deviation Analysis with Statistical Accuracy
+  // Optimized Mesh Deviation Analysis with Faster Performance
   const calculateMeshDeviations = (queryGeometry: THREE.BufferGeometry, referenceGeometry: THREE.BufferGeometry): {
     deviations: Float32Array;
     stats: { min: number; max: number; average: number; median: number; };
@@ -268,19 +268,30 @@ export const STLViewer: React.FC<STLViewerProps> = ({
     const referencePositions = referenceGeometry.attributes.position.array as Float32Array;
     const deviations = new Float32Array(queryPositions.length / 3);
     
-    // Build spatial index for reference mesh for faster lookups
-    const refVertices: THREE.Vector3[] = [];
+    // Optimized spatial grid for ultra-fast distance lookups
+    const gridSize = 32;
+    const spatialGrid = new Map<string, THREE.Vector3[]>();
+    const bounds = new THREE.Box3().setFromBufferAttribute(referenceGeometry.attributes.position as THREE.BufferAttribute);
+    const gridCellSize = bounds.getSize(new THREE.Vector3()).length() / gridSize;
+    
+    // Build spatial grid with reference vertices
     for (let i = 0; i < referencePositions.length; i += 3) {
-      refVertices.push(new THREE.Vector3(
+      const vertex = new THREE.Vector3(
         referencePositions[i],
         referencePositions[i + 1],
         referencePositions[i + 2]
-      ));
+      );
+      
+      const gridKey = `${Math.floor(vertex.x / gridCellSize)},${Math.floor(vertex.y / gridCellSize)},${Math.floor(vertex.z / gridCellSize)}`;
+      if (!spatialGrid.has(gridKey)) {
+        spatialGrid.set(gridKey, []);
+      }
+      spatialGrid.get(gridKey)!.push(vertex);
     }
     
     const tempDeviations: number[] = [];
     
-    // Calculate precise point-to-point deviations
+    // Ultra-fast deviation calculation using spatial grid
     for (let i = 0; i < queryPositions.length; i += 3) {
       const queryVertex = new THREE.Vector3(
         queryPositions[i],
@@ -288,16 +299,28 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         queryPositions[i + 2]
       );
       
+      const gridKey = `${Math.floor(queryVertex.x / gridCellSize)},${Math.floor(queryVertex.y / gridCellSize)},${Math.floor(queryVertex.z / gridCellSize)}`;
+      
       let minDistance = Infinity;
       
-      // Optimized distance calculation with early exit
-      for (const refVertex of refVertices) {
-        const distance = queryVertex.distanceTo(refVertex);
-        if (distance < minDistance) {
-          minDistance = distance;
+      // Check current cell and neighboring cells
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dz = -1; dz <= 1; dz++) {
+            const neighborKey = `${Math.floor(queryVertex.x / gridCellSize) + dx},${Math.floor(queryVertex.y / gridCellSize) + dy},${Math.floor(queryVertex.z / gridCellSize) + dz}`;
+            const neighbors = spatialGrid.get(neighborKey);
+            
+            if (neighbors) {
+              for (const refVertex of neighbors) {
+                const distance = queryVertex.distanceTo(refVertex);
+                if (distance < minDistance) {
+                  minDistance = distance;
+                  if (distance < 0.0001) break; // Ultra-precise early exit
+                }
+              }
+            }
+          }
         }
-        // Early exit if very close match found
-        if (distance < 0.001) break;
       }
       
       deviations[i / 3] = minDistance;
@@ -306,10 +329,10 @@ export const STLViewer: React.FC<STLViewerProps> = ({
     
     // Calculate statistical measures
     const sortedDeviations = [...tempDeviations].sort((a, b) => a - b);
-    const min = sortedDeviations[0];
-    const max = sortedDeviations[sortedDeviations.length - 1];
-    const average = tempDeviations.reduce((sum, val) => sum + val, 0) / tempDeviations.length;
-    const median = sortedDeviations[Math.floor(sortedDeviations.length / 2)];
+    const min = sortedDeviations[0] || 0;
+    const max = sortedDeviations[sortedDeviations.length - 1] || 0;
+    const average = tempDeviations.reduce((sum, val) => sum + val, 0) / tempDeviations.length || 0;
+    const median = sortedDeviations[Math.floor(sortedDeviations.length / 2)] || 0;
     
     const stats = { min, max, average, median };
     setDeviationStats(stats);
@@ -329,53 +352,48 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       // Calculate advanced deviations with statistics
       const { deviations, stats } = calculateMeshDeviations(queryGeometry, referenceGeometry);
       
-      // Create sophisticated vertex colors with professional medical color scheme
+      // Perfect dual-color deviation mapping as requested
       const colors = new Float32Array(superGeometry.attributes.position.count * 3);
       const maxDeviation = stats.max;
+      const deviationThreshold = 0.001; // Ultra-precise threshold for deviation detection
       
       for (let i = 0; i < deviations.length; i++) {
         const deviation = deviations[i];
-        const normalizedDeviation = maxDeviation > 0 ? deviation / maxDeviation : 0;
         const colorIndex = i * 3;
         
-        // Professional medical heatmap color mapping
-        if (normalizedDeviation <= 0.1) {
-          // Excellent match - Deep Green (HSL: 140, 65%, 45%)
-          colors[colorIndex] = 0.133;     // R
-          colors[colorIndex + 1] = 0.753; // G
-          colors[colorIndex + 2] = 0.416; // B
-        } else if (normalizedDeviation <= 0.25) {
-          // Good match - Light Green
-          colors[colorIndex] = 0.486;     // R
-          colors[colorIndex + 1] = 0.867; // G
-          colors[colorIndex + 2] = 0.514; // B
-        } else if (normalizedDeviation <= 0.5) {
-          // Moderate deviation - Yellow (HSL: 45, 90%, 55%)
-          colors[colorIndex] = 0.976;     // R
-          colors[colorIndex + 1] = 0.867; // G
-          colors[colorIndex + 2] = 0.220; // B
-        } else if (normalizedDeviation <= 0.75) {
-          // High deviation - Orange
-          colors[colorIndex] = 1.0;       // R
-          colors[colorIndex + 1] = 0.647; // G
-          colors[colorIndex + 2] = 0.0;   // B
+        if (deviation <= deviationThreshold) {
+          // NO DEVIATION - Pale Apollo Green (HSL: 158, 45%, 85%)
+          colors[colorIndex] = 0.835;     // R (213/255)
+          colors[colorIndex + 1] = 0.949; // G (242/255)
+          colors[colorIndex + 2] = 0.890; // B (227/255)
         } else {
-          // Critical deviation - Red (HSL: 0, 75%, 55%)
-          colors[colorIndex] = 0.894;     // R
-          colors[colorIndex + 1] = 0.278; // G
-          colors[colorIndex + 2] = 0.278; // B
+          // HAS DEVIATION - Dark Gradient Pink with intensity based on deviation amount
+          const intensity = Math.min(deviation / (maxDeviation || 1), 1);
+          
+          // Dark Gradient Pink (HSL: 315, 75%, 35%) with intensity variation
+          const baseR = 0.651; // 166/255
+          const baseG = 0.133; // 34/255
+          const baseB = 0.412; // 105/255
+          
+          // Apply intensity gradient (darker = more deviation)
+          colors[colorIndex] = baseR * (0.4 + 0.6 * intensity);     // R
+          colors[colorIndex + 1] = baseG * (0.4 + 0.6 * intensity); // G
+          colors[colorIndex + 2] = baseB * (0.4 + 0.6 * intensity); // B
         }
       }
       
       superGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
       
-      const material = new THREE.MeshLambertMaterial({
+      // High-performance material for accurate visualization
+      const material = new THREE.MeshPhongMaterial({
         vertexColors: true,
         transparent: true,
-        opacity: 0.95,
+        opacity: 0.98,
         wireframe: showWireframe,
         side: THREE.DoubleSide,
-        flatShading: false
+        flatShading: false,
+        shininess: 15,
+        specular: 0x222222
       });
       
       const mesh = new THREE.Mesh(superGeometry, material);
@@ -386,14 +404,16 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       
       return mesh;
     } else {
-      // Professional unified model without heatmap
-      const material = new THREE.MeshLambertMaterial({
-        color: 0x4a90e2, // Professional medical blue
+      // Professional unified model with apollo green base color
+      const material = new THREE.MeshPhongMaterial({
+        color: 0xd5f2e3, // Pale Apollo Green
         transparent: true,
-        opacity: 0.85,
+        opacity: 0.92,
         wireframe: showWireframe,
         side: THREE.DoubleSide,
-        flatShading: false
+        flatShading: false,
+        shininess: 20,
+        specular: 0x333333
       });
       
       const mesh = new THREE.Mesh(superGeometry, material);
@@ -743,50 +763,41 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       {/* Professional Deviation Analysis Legend */}
       {analysisComplete && showHeatmap && deviationStats && (
         <div className="p-5 border-t border-border bg-gradient-to-r from-surface/50 to-background/50">
-          <div className="space-y-3">
+            <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="font-medium text-foreground">Deviation Analysis Scale</h4>
+              <h4 className="font-medium text-foreground">Precision Deviation Analysis</h4>
               <span className="text-xs text-muted-foreground">Range: {deviationStats.min.toFixed(4)}mm - {deviationStats.max.toFixed(4)}mm</span>
             </div>
             
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-sm border border-border" style={{backgroundColor: 'rgb(34, 197, 94)'}} />
-                  <div className="text-xs">
-                    <div className="font-medium text-foreground">Excellent</div>
-                    <div className="text-muted-foreground">≤10% deviation</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-sm border border-border" style={{backgroundColor: 'rgb(124, 221, 131)'}} />
-                  <div className="text-xs">
-                    <div className="font-medium text-foreground">Good</div>
-                    <div className="text-muted-foreground">10-25%</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-sm border border-border" style={{backgroundColor: 'rgb(249, 221, 56)'}} />
-                  <div className="text-xs">
-                    <div className="font-medium text-foreground">Moderate</div>
-                    <div className="text-muted-foreground">25-50%</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-sm border border-border" style={{backgroundColor: 'rgb(255, 165, 0)'}} />
-                  <div className="text-xs">
-                    <div className="font-medium text-foreground">High</div>
-                    <div className="text-muted-foreground">50-75%</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-sm border border-border" style={{backgroundColor: 'rgb(228, 71, 71)'}} />
-                  <div className="text-xs">
-                    <div className="font-medium text-foreground">Critical</div>
-                    <div className="text-muted-foreground">&gt;75%</div>
-                  </div>
+            <div className="flex items-center justify-center gap-8">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-lg border-2 border-border shadow-sm" style={{backgroundColor: 'rgb(213, 242, 227)'}} />
+                <div className="text-sm">
+                  <div className="font-semibold text-foreground">No Deviation</div>
+                  <div className="text-muted-foreground">Pale Apollo Green</div>
                 </div>
               </div>
+              
+              <div className="w-px h-8 bg-border" />
+              
+              <div className="flex items-center gap-3">
+                <div 
+                  className="w-6 h-6 rounded-lg border-2 border-border shadow-sm"
+                  style={{
+                    background: 'linear-gradient(135deg, rgb(166, 34, 105) 0%, rgb(107, 22, 68) 100%)'
+                  }}
+                />
+                <div className="text-sm">
+                  <div className="font-semibold text-foreground">Has Deviation</div>
+                  <div className="text-muted-foreground">Dark Gradient Pink</div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">
+                Intensity increases with deviation magnitude • Threshold: 0.001mm
+              </p>
             </div>
           </div>
         </div>
