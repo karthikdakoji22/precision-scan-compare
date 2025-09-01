@@ -4,20 +4,21 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { 
-  Microscope, 
-  Upload, 
   Play, 
   FileText, 
-  Target, 
-  Activity,
   Download,
-  Settings
+  Activity
 } from 'lucide-react';
 
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { UploadZone } from '@/components/UploadZone';
 import { STLViewer } from '@/components/STLViewer';
 import { MetricsDashboard } from '@/components/MetricsDashboard';
 import { AnalysisProcessor } from '@/components/AnalysisProcessor';
+import { HeatmapLegend } from '@/components/HeatmapLegend';
+import { ViewerControls } from '@/components/ViewerControls';
+import { AnalysisReport } from '@/components/AnalysisReport';
 
 const Index = () => {
   const [referenceFile, setReferenceFile] = useState<File | null>(null);
@@ -26,6 +27,11 @@ const Index = () => {
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [showProcessor, setShowProcessor] = useState(false);
   const [metrics, setMetrics] = useState(null);
+  
+  // Viewer controls state
+  const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
+  const [isWireframeMode, setIsWireframeMode] = useState(false);
+  const [viewMode, setViewMode] = useState<'reference' | 'query' | 'superimposed'>('superimposed');
 
   const handleStartAnalysis = () => {
     if (!referenceFile || !queryFile) {
@@ -69,39 +75,45 @@ const Index = () => {
     }, 1000);
   };
 
+  const handleShareReport = () => {
+    toast.success('Generating shareable link...');
+    setTimeout(() => {
+      toast.success('Report link copied to clipboard!');
+    }, 1000);
+  };
+
+  // Viewer control handlers
+  const handleResetView = () => {
+    toast.info('View reset to default position');
+  };
+
+  const handleZoomIn = () => {
+    toast.info('Zooming in...');
+  };
+
+  const handleZoomOut = () => {
+    toast.info('Zooming out...');
+  };
+
+  const handleToggleHeatmap = () => {
+    setIsHeatmapVisible(!isHeatmapVisible);
+    toast.info(`Heatmap ${!isHeatmapVisible ? 'enabled' : 'disabled'}`);
+  };
+
+  const handleToggleWireframe = () => {
+    setIsWireframeMode(!isWireframeMode);
+    toast.info(`Wireframe mode ${!isWireframeMode ? 'enabled' : 'disabled'}`);
+  };
+
+  const handleFullscreen = () => {
+    toast.info('Entering fullscreen mode...');
+  };
+
   const canStartAnalysis = referenceFile && queryFile && !isAnalyzing;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-surface to-background">
-      {/* Header */}
-      <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-40">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Microscope className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">
-                  Precision Cavity Analyzer
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  Advanced STL Superimposition & Deviation Analysis
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-primary/10 text-primary border-primary">
-                v1.0.0
-              </Badge>
-              <Button variant="ghost" size="sm">
-                <Settings className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="container mx-auto px-6 py-8 space-y-8">
         {/* Upload Section */}
@@ -179,18 +191,45 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-              {/* 3D Viewer - Takes 2/3 of the width on large screens */}
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+              {/* 3D Viewer - Takes main space */}
               <div className="xl:col-span-2">
                 <STLViewer
                   referenceFile={referenceFile}
                   queryFile={queryFile}
                   isAnalyzing={isAnalyzing}
                   analysisComplete={analysisComplete}
+                  isHeatmapVisible={isHeatmapVisible}
+                  isWireframeMode={isWireframeMode}
+                  viewMode={viewMode}
                 />
               </div>
 
-              {/* Quick Stats - Takes 1/3 of the width on large screens */}
+              {/* Controls and Info */}
+              <div className="space-y-4">
+                <ViewerControls
+                  onReset={handleResetView}
+                  onZoomIn={handleZoomIn}
+                  onZoomOut={handleZoomOut}
+                  onToggleHeatmap={handleToggleHeatmap}
+                  onToggleWireframe={handleToggleWireframe}
+                  onFullscreen={handleFullscreen}
+                  isHeatmapVisible={isHeatmapVisible}
+                  isWireframeMode={isWireframeMode}
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
+                />
+
+                {analysisComplete && (
+                  <HeatmapLegend
+                    minDeviation={0.0}
+                    maxDeviation={0.45}
+                    unit="mm"
+                  />
+                )}
+              </div>
+
+              {/* Analysis Report */}
               <div className="space-y-4">
                 <Card className="p-4">
                   <h3 className="font-semibold text-foreground mb-3">Analysis Status</h3>
@@ -221,28 +260,14 @@ const Index = () => {
                 </Card>
 
                 {analysisComplete && (
-                  <Card className="p-4">
-                    <h3 className="font-semibold text-foreground mb-3">Quick Actions</h3>
-                    <div className="space-y-2">
-                      <Button 
-                        onClick={handleGenerateReport} 
-                        size="sm" 
-                        className="w-full gap-2"
-                      >
-                        <FileText className="w-4 h-4" />
-                        Generate Report
-                      </Button>
-                      <Button 
-                        onClick={handleExportData} 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full gap-2"
-                      >
-                        <Download className="w-4 h-4" />
-                        Export Data
-                      </Button>
-                    </div>
-                  </Card>
+                  <AnalysisReport
+                    referenceFile={referenceFile}
+                    queryFile={queryFile}
+                    metrics={metrics}
+                    onGenerateReport={handleGenerateReport}
+                    onExportData={handleExportData}
+                    onShareReport={handleShareReport}
+                  />
                 )}
               </div>
             </div>
@@ -270,6 +295,8 @@ const Index = () => {
           </section>
         )}
       </main>
+
+      <Footer />
 
       {/* Analysis Processor Modal */}
       <AnalysisProcessor

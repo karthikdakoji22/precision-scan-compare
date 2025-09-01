@@ -22,6 +22,9 @@ interface STLViewerProps {
   isAnalyzing: boolean;
   analysisComplete: boolean;
   deviationData?: number[];
+  isHeatmapVisible?: boolean;
+  isWireframeMode?: boolean;
+  viewMode?: 'reference' | 'query' | 'superimposed';
 }
 
 export const STLViewer: React.FC<STLViewerProps> = ({
@@ -29,7 +32,10 @@ export const STLViewer: React.FC<STLViewerProps> = ({
   queryFile,
   isAnalyzing,
   analysisComplete,
-  deviationData
+  deviationData,
+  isHeatmapVisible = true,
+  isWireframeMode = false,
+  viewMode = 'superimposed'
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene>();
@@ -43,10 +49,12 @@ export const STLViewer: React.FC<STLViewerProps> = ({
     superimposed?: THREE.Mesh;
   }>({});
   
-  const [showHeatmap, setShowHeatmap] = useState(true);
-  const [showWireframe, setShowWireframe] = useState(false);
   const [showReference, setShowReference] = useState(true);
   const [showQuery, setShowQuery] = useState(true);
+  
+  // Use props for controlled state
+  const showHeatmap = isHeatmapVisible;
+  const showWireframe = isWireframeMode;
   const [loadingSTL, setLoadingSTL] = useState(false);
   const [deviationStats, setDeviationStats] = useState<{
     min: number;
@@ -553,7 +561,7 @@ export const STLViewer: React.FC<STLViewerProps> = ({
     };
 
     loadAndDisplaySTL();
-  }, [referenceFile, queryFile, analysisComplete, showHeatmap, showWireframe, showReference, showQuery]);
+  }, [referenceFile, queryFile, analysisComplete, isHeatmapVisible, isWireframeMode, showReference, showQuery]);
 
   // Update materials when display options change
   useEffect(() => {
@@ -671,28 +679,26 @@ export const STLViewer: React.FC<STLViewerProps> = ({
             )}
           </div>
 
-          {analysisComplete && (
-            <div className="flex items-center gap-1 bg-surface border border-border rounded-lg p-1.5">
-              <Button 
-                variant={showHeatmap ? "default" : "ghost"} 
-                size="sm" 
-                onClick={() => setShowHeatmap(!showHeatmap)}
-                className="text-xs font-medium"
-              >
-                <Palette className="w-4 h-4" />
-                <span className="ml-1">Deviation Map</span>
-              </Button>
-              <Button 
-                variant={showWireframe ? "default" : "ghost"} 
-                size="sm" 
-                onClick={() => setShowWireframe(!showWireframe)}
-                className="text-xs"
-              >
-                <Grid3X3 className="w-4 h-4" />
-                <span className="ml-1">Wireframe</span>
-              </Button>
-            </div>
-          )}
+            {analysisComplete && (
+              <div className="flex items-center gap-1 bg-surface border border-border rounded-lg p-1.5">
+                <Button 
+                  variant={showHeatmap ? "default" : "ghost"} 
+                  size="sm" 
+                  className="text-xs font-medium"
+                >
+                  <Palette className="w-4 h-4" />
+                  <span className="ml-1">Deviation Map</span>
+                </Button>
+                <Button 
+                  variant={showWireframe ? "default" : "ghost"} 
+                  size="sm" 
+                  className="text-xs"
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                  <span className="ml-1">Wireframe</span>
+                </Button>
+              </div>
+            )}
         </div>
       </div>
 
