@@ -362,23 +362,15 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         const colorIndex = i * 3;
         
         if (deviation <= deviationThreshold) {
-          // NO DEVIATION - Bright Green base color (like in reference image)
-          colors[colorIndex] = 0.2;       // R (51/255) - Low red for green
-          colors[colorIndex + 1] = 0.9;   // G (230/255) - High green
-          colors[colorIndex + 2] = 0.4;   // B (102/255) - Medium blue for green
+          // NO DEVIATION - Mint Green (exactly like reference image)
+          colors[colorIndex] = 0.4;       // R (102/255) - Mint green red component
+          colors[colorIndex + 1] = 0.95;  // G (242/255) - High green for mint
+          colors[colorIndex + 2] = 0.7;   // B (179/255) - Blue component for mint
         } else {
-          // HAS DEVIATION - Bright Pink overlay (like in reference image)
-          const intensity = Math.min(deviation / (maxDeviation || 1), 1);
-          
-          // Bright Pink (matching reference image style)
-          const baseR = 0.92;  // 235/255 - Bright pink red
-          const baseG = 0.25;  // 64/255  - Low green for pink
-          const baseB = 0.6;   // 153/255 - Medium blue for pink
-          
-          // Apply intensity - more deviation = brighter pink
-          colors[colorIndex] = baseR * (0.7 + 0.3 * intensity);     // R
-          colors[colorIndex + 1] = baseG * (0.7 + 0.3 * intensity); // G
-          colors[colorIndex + 2] = baseB * (0.7 + 0.3 * intensity); // B
+          // HAS DEVIATION - Bright Pink (exactly like reference image)
+          colors[colorIndex] = 1.0;       // R (255/255) - Full red for bright pink
+          colors[colorIndex + 1] = 0.2;   // G (51/255) - Low green for pink
+          colors[colorIndex + 2] = 0.8;   // B (204/255) - High blue for magenta pink
         }
       }
       
@@ -404,9 +396,9 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       
       return mesh;
     } else {
-      // Base model in green color (matching reference image)
+      // Base model in mint green color (exactly like reference image)
       const material = new THREE.MeshPhongMaterial({
-        color: 0x33e666, // Bright green base color (matching reference)
+        color: 0x67f2b3, // Mint green base color (matching reference exactly)
         transparent: true,
         opacity: 0.95,
         wireframe: showWireframe,
