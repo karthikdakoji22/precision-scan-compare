@@ -362,15 +362,15 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         const colorIndex = i * 3;
         
         if (deviation <= deviationThreshold) {
-          // NO DEVIATION - Mint Green (exactly like reference image)
-          colors[colorIndex] = 0.4;       // R (102/255) - Mint green red component
-          colors[colorIndex + 1] = 0.95;  // G (242/255) - High green for mint
-          colors[colorIndex + 2] = 0.7;   // B (179/255) - Blue component for mint
+          // NO DEVIATION - Bright Green (Apollo Green)
+          colors[colorIndex] = 0.0;       // R (0/255) - No red for pure green
+          colors[colorIndex + 1] = 1.0;   // G (255/255) - Full green
+          colors[colorIndex + 2] = 0.0;   // B (0/255) - No blue for pure green
         } else {
-          // HAS DEVIATION - Bright Pink (exactly like reference image)
+          // HAS DEVIATION - Bright Pink 
           colors[colorIndex] = 1.0;       // R (255/255) - Full red for bright pink
-          colors[colorIndex + 1] = 0.2;   // G (51/255) - Low green for pink
-          colors[colorIndex + 2] = 0.8;   // B (204/255) - High blue for magenta pink
+          colors[colorIndex + 1] = 0.08;  // G (20/255) - Very low green for pink
+          colors[colorIndex + 2] = 0.58;  // B (148/255) - Pink blue component
         }
       }
       
@@ -396,9 +396,9 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       
       return mesh;
     } else {
-      // Base model in mint green color (exactly like reference image)
+      // Base model in bright green color (Apollo Green)
       const material = new THREE.MeshPhongMaterial({
-        color: 0x67f2b3, // Mint green base color (matching reference exactly)
+        color: 0x00ff00, // Bright green base color (pure green)
         transparent: true,
         opacity: 0.95,
         wireframe: showWireframe,
