@@ -362,23 +362,23 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         const colorIndex = i * 3;
         
         if (deviation <= deviationThreshold) {
-          // NO DEVIATION - Bright Apollo Green for clear visibility
-          colors[colorIndex] = 0.4;       // R (102/255) - Bright green
-          colors[colorIndex + 1] = 0.95;  // G (242/255) - Very bright green
-          colors[colorIndex + 2] = 0.55;  // B (140/255) - Medium green
+          // NO DEVIATION - Bright Green base color (like in reference image)
+          colors[colorIndex] = 0.2;       // R (51/255) - Low red for green
+          colors[colorIndex + 1] = 0.9;   // G (230/255) - High green
+          colors[colorIndex + 2] = 0.4;   // B (102/255) - Medium blue for green
         } else {
-          // HAS DEVIATION - Bright Pink for clear visibility
+          // HAS DEVIATION - Bright Pink overlay (like in reference image)
           const intensity = Math.min(deviation / (maxDeviation || 1), 1);
           
-          // Bright Pink (HSL: 330, 90%, 60%) for maximum visibility
-          const baseR = 0.95;  // 242/255 - Very bright pink
-          const baseG = 0.3;   // 77/255  - Low green for pink
-          const baseB = 0.65;  // 166/255 - Medium blue for pink
+          // Bright Pink (matching reference image style)
+          const baseR = 0.92;  // 235/255 - Bright pink red
+          const baseG = 0.25;  // 64/255  - Low green for pink
+          const baseB = 0.6;   // 153/255 - Medium blue for pink
           
-          // Apply intensity gradient (brighter = more deviation for visibility)
-          colors[colorIndex] = baseR * (0.6 + 0.4 * intensity);     // R
-          colors[colorIndex + 1] = baseG * (0.6 + 0.4 * intensity); // G
-          colors[colorIndex + 2] = baseB * (0.6 + 0.4 * intensity); // B
+          // Apply intensity - more deviation = brighter pink
+          colors[colorIndex] = baseR * (0.7 + 0.3 * intensity);     // R
+          colors[colorIndex + 1] = baseG * (0.7 + 0.3 * intensity); // G
+          colors[colorIndex + 2] = baseB * (0.7 + 0.3 * intensity); // B
         }
       }
       
@@ -404,16 +404,16 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       
       return mesh;
     } else {
-      // Professional unified model with apollo green base color
+      // Base model in green color (matching reference image)
       const material = new THREE.MeshPhongMaterial({
-        color: 0x9cf4b9, // Pale Apollo Green (HSL: 140, 85%, 65%)
+        color: 0x33e666, // Bright green base color (matching reference)
         transparent: true,
-        opacity: 0.92,
+        opacity: 0.95,
         wireframe: showWireframe,
         side: THREE.DoubleSide,
         flatShading: false,
-        shininess: 20,
-        specular: 0x444444
+        shininess: 25,
+        specular: 0x445544
       });
       
       const mesh = new THREE.Mesh(superGeometry, material);
