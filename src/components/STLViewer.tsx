@@ -362,23 +362,15 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         const colorIndex = i * 3;
         
         if (deviation <= deviationThreshold) {
-          // NO DEVIATION - Bright Apollo Green for clear visibility
-          colors[colorIndex] = 0.4;       // R (102/255) - Bright green
-          colors[colorIndex + 1] = 0.95;  // G (242/255) - Very bright green
-          colors[colorIndex + 2] = 0.55;  // B (140/255) - Medium green
+          // NO DEVIATION - Bright Green (Apollo Green)
+          colors[colorIndex] = 0.0;       // R (0/255) - No red for pure green
+          colors[colorIndex + 1] = 1.0;   // G (255/255) - Full green
+          colors[colorIndex + 2] = 0.0;   // B (0/255) - No blue for pure green
         } else {
-          // HAS DEVIATION - Bright Pink for clear visibility
-          const intensity = Math.min(deviation / (maxDeviation || 1), 1);
-          
-          // Bright Pink (HSL: 330, 90%, 60%) for maximum visibility
-          const baseR = 0.95;  // 242/255 - Very bright pink
-          const baseG = 0.3;   // 77/255  - Low green for pink
-          const baseB = 0.65;  // 166/255 - Medium blue for pink
-          
-          // Apply intensity gradient (brighter = more deviation for visibility)
-          colors[colorIndex] = baseR * (0.6 + 0.4 * intensity);     // R
-          colors[colorIndex + 1] = baseG * (0.6 + 0.4 * intensity); // G
-          colors[colorIndex + 2] = baseB * (0.6 + 0.4 * intensity); // B
+          // HAS DEVIATION - Bright Pink 
+          colors[colorIndex] = 1.0;       // R (255/255) - Full red for bright pink
+          colors[colorIndex + 1] = 0.08;  // G (20/255) - Very low green for pink
+          colors[colorIndex + 2] = 0.58;  // B (148/255) - Pink blue component
         }
       }
       
@@ -404,16 +396,16 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       
       return mesh;
     } else {
-      // Professional unified model with apollo green base color
+      // Base model in bright green color (Apollo Green)
       const material = new THREE.MeshPhongMaterial({
-        color: 0x9cf4b9, // Pale Apollo Green (HSL: 140, 85%, 65%)
+        color: 0x00ff00, // Bright green base color (pure green)
         transparent: true,
-        opacity: 0.92,
+        opacity: 0.95,
         wireframe: showWireframe,
         side: THREE.DoubleSide,
         flatShading: false,
-        shininess: 20,
-        specular: 0x444444
+        shininess: 25,
+        specular: 0x445544
       });
       
       const mesh = new THREE.Mesh(superGeometry, material);
