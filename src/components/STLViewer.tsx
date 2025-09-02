@@ -72,7 +72,7 @@ export const STLViewer: React.FC<STLViewerProps> = ({
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xfafbfc);
+    scene.background = new THREE.Color(0xf8fafc); // Enhanced light background
     sceneRef.current = scene;
 
     // Camera setup
@@ -98,8 +98,8 @@ export const STLViewer: React.FC<STLViewerProps> = ({
 
     containerRef.current.appendChild(renderer.domElement);
 
-    // Professional medical lighting setup
-    const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+    // Enhanced professional medical lighting setup
+    const ambientLight = new THREE.AmbientLight(0x506080, 0.4);
     scene.add(ambientLight);
 
     const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1.0);
@@ -113,7 +113,7 @@ export const STLViewer: React.FC<STLViewerProps> = ({
     directionalLight2.position.set(-1, 0.5, 0.5);
     scene.add(directionalLight2);
 
-    const rimLight = new THREE.DirectionalLight(0x4a90e2, 0.3);
+    const rimLight = new THREE.DirectionalLight(0x5ba7ff, 0.3); // Enhanced blue rim light
     rimLight.position.set(0, 0, -1);
     scene.add(rimLight);
 
@@ -362,23 +362,23 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         const colorIndex = i * 3;
         
         if (deviation <= deviationThreshold) {
-          // NO DEVIATION - Pale Apollo Green (HSL: 158, 45%, 85%)
-          colors[colorIndex] = 0.835;     // R (213/255)
-          colors[colorIndex + 1] = 0.949; // G (242/255)
-          colors[colorIndex + 2] = 0.890; // B (227/255)
+          // NO DEVIATION - Pale Apollo Green (HSL: 140, 85%, 65%)
+          colors[colorIndex] = 0.612;     // R (156/255) 
+          colors[colorIndex + 1] = 0.957; // G (244/255)
+          colors[colorIndex + 2] = 0.725; // B (185/255)
         } else {
-          // HAS DEVIATION - Dark Gradient Pink with intensity based on deviation amount
+          // HAS DEVIATION - Dark Gradient Pink with intensity (HSL: 330, 80%, 45%)
           const intensity = Math.min(deviation / (maxDeviation || 1), 1);
           
-          // Dark Gradient Pink (HSL: 315, 75%, 35%) with intensity variation
-          const baseR = 0.651; // 166/255
-          const baseG = 0.133; // 34/255
-          const baseB = 0.412; // 105/255
+          // Dark Gradient Pink (HSL: 330, 80%, 45%) with intensity variation
+          const baseR = 0.827; // 211/255
+          const baseG = 0.231; // 59/255  
+          const baseB = 0.494; // 126/255
           
           // Apply intensity gradient (darker = more deviation)
-          colors[colorIndex] = baseR * (0.4 + 0.6 * intensity);     // R
-          colors[colorIndex + 1] = baseG * (0.4 + 0.6 * intensity); // G
-          colors[colorIndex + 2] = baseB * (0.4 + 0.6 * intensity); // B
+          colors[colorIndex] = baseR * (0.5 + 0.5 * intensity);     // R
+          colors[colorIndex + 1] = baseG * (0.5 + 0.5 * intensity); // G
+          colors[colorIndex + 2] = baseB * (0.5 + 0.5 * intensity); // B
         }
       }
       
@@ -406,14 +406,14 @@ export const STLViewer: React.FC<STLViewerProps> = ({
     } else {
       // Professional unified model with apollo green base color
       const material = new THREE.MeshPhongMaterial({
-        color: 0xd5f2e3, // Pale Apollo Green
+        color: 0x9cf4b9, // Pale Apollo Green (HSL: 140, 85%, 65%)
         transparent: true,
         opacity: 0.92,
         wireframe: showWireframe,
         side: THREE.DoubleSide,
         flatShading: false,
         shininess: 20,
-        specular: 0x333333
+        specular: 0x444444
       });
       
       const mesh = new THREE.Mesh(superGeometry, material);

@@ -22,11 +22,12 @@ All colors MUST be HSL for consistency and theming support.
     --popover: 0 0% 100%;
     --popover-foreground: 210 20% 15%;
 
-    /* Primary brand colors - Medical Blue */
-    --primary: 210 100% 45%;
+    /* Enhanced Primary brand colors - Professional Blue */
+    --primary: 215 95% 50%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 210 100% 55%;
-    --primary-dark: 210 100% 35%;
+    --primary-light: 215 90% 60%;
+    --primary-dark: 215 100% 40%;
+    --primary-glow: 215 80% 70%;
 
     /* Secondary colors - Professional Gray */
     --secondary: 210 15% 95%;
@@ -36,10 +37,11 @@ All colors MUST be HSL for consistency and theming support.
     --muted: 210 15% 96%;
     --muted-foreground: 210 15% 45%;
 
-    /* Accent colors - Scientific Teal */
-    --accent: 180 65% 45%;
+    /* Enhanced Accent colors - Professional Teal */
+    --accent: 185 70% 50%;
     --accent-foreground: 0 0% 100%;
-    --accent-light: 180 65% 55%;
+    --accent-light: 185 65% 60%;
+    --accent-glow: 185 60% 70%;
 
     /* Status colors */
     --success: 140 70% 45%;
@@ -49,11 +51,17 @@ All colors MUST be HSL for consistency and theming support.
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
+    /* Enhanced color palette */
+    --apollo-green: 140 85% 65%;      /* Pale Apollo Green for no deviation */
+    --deviation-pink: 330 80% 45%;    /* Dark Gradient Pink for deviation */
+    --apollo-green-light: 140 75% 75%;
+    --deviation-pink-light: 330 70% 55%;
+    
     /* Heatmap colors for deviation analysis */
-    --heatmap-low: 140 65% 45%;      /* Green for low deviation */
+    --heatmap-low: 140 85% 65%;       /* Apollo Green for no deviation */
     --heatmap-medium: 45 90% 55%;     /* Yellow for medium deviation */
-    --heatmap-high: 320 75% 55%;      /* Magenta for high deviation */
-    --heatmap-critical: 0 75% 55%;    /* Red for critical deviation */
+    --heatmap-high: 330 80% 45%;      /* Pink for high deviation */
+    --heatmap-critical: 330 85% 35%;  /* Dark Pink for critical deviation */
 
     /* Border and input colors */
     --border: 210 20% 88%;

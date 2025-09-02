@@ -28,7 +28,8 @@ export default {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))',
 					light: 'hsl(var(--primary-light))',
-					dark: 'hsl(var(--primary-dark))'
+					dark: 'hsl(var(--primary-dark))',
+					glow: 'hsl(var(--primary-glow))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -45,7 +46,8 @@ export default {
 				accent: {
 					DEFAULT: 'hsl(var(--accent))',
 					foreground: 'hsl(var(--accent-foreground))',
-					light: 'hsl(var(--accent-light))'
+					light: 'hsl(var(--accent-light))',
+					glow: 'hsl(var(--accent-glow))'
 				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
@@ -72,6 +74,14 @@ export default {
 					medium: 'hsl(var(--heatmap-medium))',
 					high: 'hsl(var(--heatmap-high))',
 					critical: 'hsl(var(--heatmap-critical))'
+				},
+				apollo: {
+					green: 'hsl(var(--apollo-green))',
+					'green-light': 'hsl(var(--apollo-green-light))'
+				},
+				deviation: {
+					pink: 'hsl(var(--deviation-pink))',
+					'pink-light': 'hsl(var(--deviation-pink-light))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
