@@ -362,23 +362,23 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         const colorIndex = i * 3;
         
         if (deviation <= deviationThreshold) {
-          // NO DEVIATION - Pale Apollo Green (HSL: 140, 85%, 65%)
-          colors[colorIndex] = 0.612;     // R (156/255) 
-          colors[colorIndex + 1] = 0.957; // G (244/255)
-          colors[colorIndex + 2] = 0.725; // B (185/255)
+          // NO DEVIATION - Bright Apollo Green for clear visibility
+          colors[colorIndex] = 0.4;       // R (102/255) - Bright green
+          colors[colorIndex + 1] = 0.95;  // G (242/255) - Very bright green
+          colors[colorIndex + 2] = 0.55;  // B (140/255) - Medium green
         } else {
-          // HAS DEVIATION - Dark Gradient Pink with intensity (HSL: 330, 80%, 45%)
+          // HAS DEVIATION - Bright Pink for clear visibility
           const intensity = Math.min(deviation / (maxDeviation || 1), 1);
           
-          // Dark Gradient Pink (HSL: 330, 80%, 45%) with intensity variation
-          const baseR = 0.827; // 211/255
-          const baseG = 0.231; // 59/255  
-          const baseB = 0.494; // 126/255
+          // Bright Pink (HSL: 330, 90%, 60%) for maximum visibility
+          const baseR = 0.95;  // 242/255 - Very bright pink
+          const baseG = 0.3;   // 77/255  - Low green for pink
+          const baseB = 0.65;  // 166/255 - Medium blue for pink
           
-          // Apply intensity gradient (darker = more deviation)
-          colors[colorIndex] = baseR * (0.5 + 0.5 * intensity);     // R
-          colors[colorIndex + 1] = baseG * (0.5 + 0.5 * intensity); // G
-          colors[colorIndex + 2] = baseB * (0.5 + 0.5 * intensity); // B
+          // Apply intensity gradient (brighter = more deviation for visibility)
+          colors[colorIndex] = baseR * (0.6 + 0.4 * intensity);     // R
+          colors[colorIndex + 1] = baseG * (0.6 + 0.4 * intensity); // G
+          colors[colorIndex + 2] = baseB * (0.6 + 0.4 * intensity); // B
         }
       }
       
