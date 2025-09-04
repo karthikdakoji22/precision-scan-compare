@@ -52,16 +52,16 @@ All colors MUST be HSL for consistency and theming support.
     --destructive-foreground: 0 0% 100%;
 
     /* Enhanced color palette */
-    --apollo-green: 140 85% 65%;      /* Pale Apollo Green for no deviation */
-    --deviation-pink: 330 80% 45%;    /* Dark Gradient Pink for deviation */
-    --apollo-green-light: 140 75% 75%;
-    --deviation-pink-light: 330 70% 55%;
+    --apollo-green: 140 85% 65%;      /* Apollo Green for no deviation */
+    --apollo-green-light: 140 75% 85%; /* Light Mint Green for no deviation */
+    --deviation-magenta: 300 50% 41%;  /* Dark Magenta for deviation */
+    --deviation-magenta-dark: 300 55% 33%; /* Darker Magenta for intense deviation */
     
     /* Heatmap colors for deviation analysis */
-    --heatmap-low: 140 85% 65%;       /* Apollo Green for no deviation */
+    --heatmap-low: 140 75% 85%;       /* Light Mint Green for no deviation */
     --heatmap-medium: 45 90% 55%;     /* Yellow for medium deviation */
-    --heatmap-high: 330 80% 45%;      /* Pink for high deviation */
-    --heatmap-critical: 330 85% 35%;  /* Dark Pink for critical deviation */
+    --heatmap-high: 300 50% 41%;      /* Dark Magenta for high deviation */
+    --heatmap-critical: 300 55% 33%;  /* Darker Magenta for critical deviation */
 
     /* Border and input colors */
     --border: 210 20% 88%;
