@@ -4,6 +4,7 @@ import { STLLoader } from 'three-stdlib';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useTheme } from 'next-themes';
 import { 
   RotateCcw, 
   ZoomIn, 
@@ -37,6 +38,7 @@ export const STLViewer: React.FC<STLViewerProps> = ({
   isWireframeMode = false,
   viewMode = 'superimposed'
 }) => {
+  const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene>();
   const rendererRef = useRef<THREE.WebGLRenderer>();
@@ -72,7 +74,9 @@ export const STLViewer: React.FC<STLViewerProps> = ({
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf8fafc); // Enhanced light background
+    // Theme-aware background color
+    const backgroundColor = theme === 'dark' ? 0x0f0f23 : 0xf8fafc;
+    scene.background = new THREE.Color(backgroundColor);
     sceneRef.current = scene;
 
     // Camera setup
@@ -362,23 +366,23 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         const colorIndex = i * 3;
         
         if (deviation <= deviationThreshold) {
-          // NO DEVIATION - Bright Apollo Green for clear visibility
-          colors[colorIndex] = 0.4;       // R (102/255) - Bright green
-          colors[colorIndex + 1] = 0.95;  // G (242/255) - Very bright green
-          colors[colorIndex + 2] = 0.55;  // B (140/255) - Medium green
+          // NO DEVIATION - Mint Green (RGB: 152, 251, 152)
+          colors[colorIndex] = 152 / 255;     // R - Mint green
+          colors[colorIndex + 1] = 251 / 255; // G - Mint green  
+          colors[colorIndex + 2] = 152 / 255; // B - Mint green
         } else {
-          // HAS DEVIATION - Bright Pink for clear visibility
+          // HAS DEVIATION - Pink (RGB: 255, 182, 193) 
           const intensity = Math.min(deviation / (maxDeviation || 1), 1);
           
-          // Bright Pink (HSL: 330, 90%, 60%) for maximum visibility
-          const baseR = 0.95;  // 242/255 - Very bright pink
-          const baseG = 0.3;   // 77/255  - Low green for pink
-          const baseB = 0.65;  // 166/255 - Medium blue for pink
+          // Base pink color
+          const baseR = 255 / 255;  // Pure red component
+          const baseG = 182 / 255;  // Reduced green for pink
+          const baseB = 193 / 255;  // Blue component for pink
           
-          // Apply intensity gradient (brighter = more deviation for visibility)
-          colors[colorIndex] = baseR * (0.6 + 0.4 * intensity);     // R
-          colors[colorIndex + 1] = baseG * (0.6 + 0.4 * intensity); // G
-          colors[colorIndex + 2] = baseB * (0.6 + 0.4 * intensity); // B
+          // Apply intensity (darker pink = more deviation)
+          colors[colorIndex] = baseR * (0.7 + 0.3 * intensity);     // R
+          colors[colorIndex + 1] = baseG * (0.7 + 0.3 * intensity); // G
+          colors[colorIndex + 2] = baseB * (0.7 + 0.3 * intensity); // B
         }
       }
       
@@ -404,9 +408,9 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       
       return mesh;
     } else {
-      // Professional unified model with apollo green base color
+      // Professional unified model with mint green base color
       const material = new THREE.MeshPhongMaterial({
-        color: 0x9cf4b9, // Pale Apollo Green (HSL: 140, 85%, 65%)
+        color: 0x98fb98, // Mint Green (RGB: 152, 251, 152)
         transparent: true,
         opacity: 0.92,
         wireframe: showWireframe,
@@ -473,9 +477,9 @@ export const STLViewer: React.FC<STLViewerProps> = ({
             loadedGeometriesRef.current.reference = refData.geometry;
             
             if (!analysisComplete) {
-              // Show reference model separately before analysis
+              // Show reference model separately before analysis - mint green
               const material = new THREE.MeshLambertMaterial({
-                color: 0x22c55e, // Professional green
+                color: 0x98fb98, // Mint Green (RGB: 152, 251, 152)
                 transparent: true,
                 opacity: 0.9,
                 wireframe: showWireframe,
@@ -504,9 +508,9 @@ export const STLViewer: React.FC<STLViewerProps> = ({
             loadedGeometriesRef.current.query = queryData.geometry;
             
             if (!analysisComplete) {
-              // Show query model separately before analysis
+              // Show query model separately before analysis - mint green
               const material = new THREE.MeshLambertMaterial({
-                color: 0x3b82f6, // Professional blue
+                color: 0x98fb98, // Mint Green (RGB: 152, 251, 152)
                 transparent: true,
                 opacity: 0.9,
                 wireframe: showWireframe,
