@@ -366,15 +366,15 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         const colorIndex = i * 3;
         
         if (deviation <= deviationThreshold) {
-          // NO DEVIATION - Mint Green Color
-          colors[colorIndex] = 0.4;     // R - Mint green
-          colors[colorIndex + 1] = 1.0; // G - Mint green  
-          colors[colorIndex + 2] = 0.6; // B - Mint green
+          // NO DEVIATION - Bright Mint Green (matching reference image)
+          colors[colorIndex] = 0.0;     // R - Bright mint green
+          colors[colorIndex + 1] = 0.9; // G - Bright mint green  
+          colors[colorIndex + 2] = 0.6; // B - Bright mint green
         } else {
-          // HAS DEVIATION - Pink Color Only
-          colors[colorIndex] = 1.0;     // R - Pink
-          colors[colorIndex + 1] = 0.4; // G - Pink
-          colors[colorIndex + 2] = 0.7; // B - Pink
+          // HAS DEVIATION - Vibrant Pink (matching reference image)
+          colors[colorIndex] = 1.0;     // R - Vibrant pink
+          colors[colorIndex + 1] = 0.2; // G - Vibrant pink
+          colors[colorIndex + 2] = 0.8; // B - Vibrant pink
         }
       }
       
