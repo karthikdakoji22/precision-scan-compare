@@ -366,24 +366,15 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         const colorIndex = i * 3;
         
         if (deviation <= deviationThreshold) {
-          // NO DEVIATION - Light Mint Green (RGB: 178, 255, 178 - Apollo Green Light)
-          colors[colorIndex] = 178 / 255;     // R - Light mint green
-          colors[colorIndex + 1] = 255 / 255; // G - Light mint green  
-          colors[colorIndex + 2] = 178 / 255; // B - Light mint green
+          // NO DEVIATION - Mint Green Color
+          colors[colorIndex] = 0.4;     // R - Mint green
+          colors[colorIndex + 1] = 1.0; // G - Mint green  
+          colors[colorIndex + 2] = 0.6; // B - Mint green
         } else {
-          // HAS DEVIATION - Dark Pink/Magenta for high contrast
-          const intensity = Math.min(deviation / (maxDeviation || 1), 1);
-          
-          // Dark gradient pink colors for deviation areas
-          const baseR = 139 / 255;  // Dark magenta red
-          const baseG = 69 / 255;   // Dark magenta green
-          const baseB = 139 / 255;  // Dark magenta blue
-          
-          // Apply intensity (darker = more deviation)
-          const darknessFactor = 0.3 + 0.7 * intensity; // Gets darker with more deviation
-          colors[colorIndex] = baseR * darknessFactor;     // R
-          colors[colorIndex + 1] = baseG * darknessFactor; // G
-          colors[colorIndex + 2] = baseB * darknessFactor; // B
+          // HAS DEVIATION - Pink Color Only
+          colors[colorIndex] = 1.0;     // R - Pink
+          colors[colorIndex + 1] = 0.4; // G - Pink
+          colors[colorIndex + 2] = 0.7; // B - Pink
         }
       }
       
@@ -409,9 +400,9 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       
       return mesh;
     } else {
-      // Professional unified model with light mint green base color
+      // Professional unified model with mint green base color
       const material = new THREE.MeshPhongMaterial({
-        color: 0xb2ffb2, // Light Mint Green (RGB: 178, 255, 178)
+        color: 0x66ff99, // Mint Green
         transparent: true,
         opacity: 0.95,
         wireframe: showWireframe,
@@ -478,9 +469,9 @@ export const STLViewer: React.FC<STLViewerProps> = ({
             loadedGeometriesRef.current.reference = refData.geometry;
             
             if (!analysisComplete) {
-              // Show reference model separately before analysis - light mint green
+              // Show reference model separately before analysis - mint green
               const material = new THREE.MeshLambertMaterial({
-                color: 0xb2ffb2, // Light Mint Green (RGB: 178, 255, 178)
+                color: 0x66ff99, // Mint Green
                 transparent: true,
                 opacity: 0.92,
                 wireframe: showWireframe,
