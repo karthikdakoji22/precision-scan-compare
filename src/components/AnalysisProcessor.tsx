@@ -27,6 +27,8 @@ interface AnalysisProcessorProps {
   onAnalysisComplete: () => void;
   onCancel: () => void;
   isVisible: boolean;
+  analysisStage?: string;
+  analysisProgress?: number;
 }
 
 export const AnalysisProcessor: React.FC<AnalysisProcessorProps> = ({
@@ -34,7 +36,9 @@ export const AnalysisProcessor: React.FC<AnalysisProcessorProps> = ({
   queryFile,
   onAnalysisComplete,
   onCancel,
-  isVisible
+  isVisible,
+  analysisStage = '',
+  analysisProgress = 0
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [overallProgress, setOverallProgress] = useState(0);

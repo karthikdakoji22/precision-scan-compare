@@ -1,10 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
-import { STLLoader } from 'three-stdlib';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from 'next-themes';
+import { toast } from 'sonner';
 import { 
   RotateCcw, 
   ZoomIn, 
@@ -16,16 +16,19 @@ import {
   Move3D,
   RefreshCw 
 } from 'lucide-react';
+import { STLProcessor, SuperimpositionResult } from '@/utils/stlProcessor';
 
 interface STLViewerProps {
   referenceFile: File | null;
   queryFile: File | null;
   isAnalyzing: boolean;
   analysisComplete: boolean;
-  deviationData?: number[];
   isHeatmapVisible?: boolean;
   isWireframeMode?: boolean;
   viewMode?: 'reference' | 'query' | 'superimposed';
+  onAnalysisProgress?: (stage: string, progress: number) => void;
+  onAnalysisComplete?: (result: SuperimpositionResult) => void;
+  onAnalysisError?: (error: Error) => void;
 }
 
 export const STLViewer: React.FC<STLViewerProps> = ({
@@ -33,48 +36,32 @@ export const STLViewer: React.FC<STLViewerProps> = ({
   queryFile,
   isAnalyzing,
   analysisComplete,
-  deviationData,
   isHeatmapVisible = true,
   isWireframeMode = false,
-  viewMode = 'superimposed'
+  viewMode = 'superimposed',
+  onAnalysisProgress,
+  onAnalysisComplete,
+  onAnalysisError
 }) => {
   const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene>();
   const rendererRef = useRef<THREE.WebGLRenderer>();
   const cameraRef = useRef<THREE.PerspectiveCamera>();
-  const controlsRef = useRef<any>();
-  const stlLoaderRef = useRef<STLLoader>();
-  const loadedMeshesRef = useRef<{
-    reference?: THREE.Mesh;
-    query?: THREE.Mesh;
-    superimposed?: THREE.Mesh;
-  }>({});
+  const analysisResultRef = useRef<SuperimpositionResult | null>(null);
   
-  const [showReference, setShowReference] = useState(true);
-  const [showQuery, setShowQuery] = useState(true);
-  
-  // Use props for controlled state
-  const showHeatmap = isHeatmapVisible;
-  const showWireframe = isWireframeMode;
   const [loadingSTL, setLoadingSTL] = useState(false);
-  const [deviationStats, setDeviationStats] = useState<{
-    min: number;
-    max: number;
-    average: number;
-    median: number;
-  } | null>(null);
+  const [currentStage, setCurrentStage] = useState<string>('');
+  const [analysisProgress, setAnalysisProgress] = useState<number>(0);
 
-  // Initialize Three.js scene and STL loader
+  // Initialize Three.js scene
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Initialize STL loader
-    stlLoaderRef.current = new STLLoader();
+    console.log('Initializing Three.js scene...');
 
     // Scene setup
     const scene = new THREE.Scene();
-    // Perfect theme-aware background color for enhanced contrast
     const backgroundColor = theme === 'dark' ? 0x1a1a2e : 0xf1f5f9;
     scene.background = new THREE.Color(backgroundColor);
     sceneRef.current = scene;
@@ -86,7 +73,8 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       0.1,
       1000
     );
-    camera.position.set(0, 0, 5);
+    camera.position.set(5, 5, 5);
+    camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
 
     // Renderer setup
@@ -102,26 +90,22 @@ export const STLViewer: React.FC<STLViewerProps> = ({
 
     containerRef.current.appendChild(renderer.domElement);
 
-    // Enhanced professional medical lighting setup
-    const ambientLight = new THREE.AmbientLight(0x506080, 0.4);
+    // Professional lighting setup
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
     scene.add(ambientLight);
 
-    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1.0);
-    directionalLight1.position.set(1, 1, 1);
-    directionalLight1.castShadow = true;
-    directionalLight1.shadow.mapSize.width = 2048;
-    directionalLight1.shadow.mapSize.height = 2048;
-    scene.add(directionalLight1);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    directionalLight.position.set(10, 10, 5);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+    scene.add(directionalLight);
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
-    directionalLight2.position.set(-1, 0.5, 0.5);
-    scene.add(directionalLight2);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+    fillLight.position.set(-10, 5, -5);
+    scene.add(fillLight);
 
-    const rimLight = new THREE.DirectionalLight(0x5ba7ff, 0.3); // Enhanced blue rim light
-    rimLight.position.set(0, 0, -1);
-    scene.add(rimLight);
-
-    // Controls (basic mouse interaction)
+    // Basic mouse controls
     let isMouseDown = false;
     let mouseX = 0;
     let mouseY = 0;
@@ -138,9 +122,15 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       const deltaX = event.clientX - mouseX;
       const deltaY = event.clientY - mouseY;
 
-      // Rotate scene
-      scene.rotation.y += deltaX * 0.01;
-      scene.rotation.x += deltaY * 0.01;
+      // Rotate camera around the scene
+      const spherical = new THREE.Spherical();
+      spherical.setFromVector3(camera.position);
+      spherical.theta -= deltaX * 0.01;
+      spherical.phi += deltaY * 0.01;
+      spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+
+      camera.position.setFromSpherical(spherical);
+      camera.lookAt(0, 0, 0);
 
       mouseX = event.clientX;
       mouseY = event.clientY;
@@ -152,8 +142,16 @@ export const STLViewer: React.FC<STLViewerProps> = ({
 
     const handleWheel = (event: WheelEvent) => {
       event.preventDefault();
-      camera.position.z += event.deltaY * 0.01;
-      camera.position.z = Math.max(1, Math.min(20, camera.position.z));
+      const factor = event.deltaY > 0 ? 1.1 : 0.9;
+      camera.position.multiplyScalar(factor);
+      
+      // Limit zoom range
+      const distance = camera.position.length();
+      if (distance < 2) {
+        camera.position.setLength(2);
+      } else if (distance > 50) {
+        camera.position.setLength(50);
+      }
     };
 
     renderer.domElement.addEventListener('mousedown', handleMouseDown);
@@ -168,6 +166,8 @@ export const STLViewer: React.FC<STLViewerProps> = ({
     };
     animate();
 
+    console.log('Three.js scene initialized');
+
     // Cleanup
     return () => {
       renderer.domElement.removeEventListener('mousedown', handleMouseDown);
@@ -180,7 +180,7 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       }
       renderer.dispose();
     };
-  }, []);
+  }, [theme]);
 
   // Handle window resize
   useEffect(() => {
@@ -199,608 +199,285 @@ export const STLViewer: React.FC<STLViewerProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Advanced STL File Loading with Precision Alignment
-  const loadSTLFile = async (file: File, type: 'reference' | 'query'): Promise<{ 
-    geometry: THREE.BufferGeometry, 
-    originalGeometry: THREE.BufferGeometry,
-    boundingBox: THREE.Box3,
-    center: THREE.Vector3,
-    scale: number 
-  } | null> => {
-    if (!stlLoaderRef.current) return null;
-
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      
-      reader.onload = (event) => {
-        const arrayBuffer = event.target?.result as ArrayBuffer;
-        if (!arrayBuffer) {
-          reject(new Error('Failed to read file'));
-          return;
-        }
-
-        try {
-          const originalGeometry = stlLoaderRef.current!.parse(arrayBuffer);
-          const geometry = originalGeometry.clone();
-          
-          // Calculate precise bounding box and center
-          geometry.computeBoundingBox();
-          const boundingBox = geometry.boundingBox!;
-          const center = new THREE.Vector3();
-          boundingBox.getCenter(center);
-          
-          // Store original center for alignment
-          const originalCenter = center.clone();
-          
-          // Center geometry at origin for perfect alignment
-          geometry.translate(-center.x, -center.y, -center.z);
-          
-          // Calculate consistent scaling for superimposition
-          const size = new THREE.Vector3();
-          boundingBox.getSize(size);
-          const maxDimension = Math.max(size.x, size.y, size.z);
-          const scale = 3 / maxDimension; // Larger scale for better detail
-          geometry.scale(scale, scale, scale);
-          
-          // Optimize geometry for analysis
-          geometry.computeVertexNormals();
-          geometry.computeBoundingSphere();
-          
-          resolve({ 
-            geometry, 
-            originalGeometry, 
-            boundingBox, 
-            center: originalCenter, 
-            scale 
-          });
-        } catch (error) {
-          reject(error);
-        }
-      };
-      
-      reader.onerror = () => reject(new Error('Failed to read STL file'));
-      reader.readAsArrayBuffer(file);
-    });
-  };
-
-  // Optimized Mesh Deviation Analysis with Faster Performance
-  const calculateMeshDeviations = (queryGeometry: THREE.BufferGeometry, referenceGeometry: THREE.BufferGeometry): {
-    deviations: Float32Array;
-    stats: { min: number; max: number; average: number; median: number; };
-  } => {
-    const queryPositions = queryGeometry.attributes.position.array as Float32Array;
-    const referencePositions = referenceGeometry.attributes.position.array as Float32Array;
-    const deviations = new Float32Array(queryPositions.length / 3);
-    
-    // Optimized spatial grid for ultra-fast distance lookups
-    const gridSize = 32;
-    const spatialGrid = new Map<string, THREE.Vector3[]>();
-    const bounds = new THREE.Box3().setFromBufferAttribute(referenceGeometry.attributes.position as THREE.BufferAttribute);
-    const gridCellSize = bounds.getSize(new THREE.Vector3()).length() / gridSize;
-    
-    // Build spatial grid with reference vertices
-    for (let i = 0; i < referencePositions.length; i += 3) {
-      const vertex = new THREE.Vector3(
-        referencePositions[i],
-        referencePositions[i + 1],
-        referencePositions[i + 2]
-      );
-      
-      const gridKey = `${Math.floor(vertex.x / gridCellSize)},${Math.floor(vertex.y / gridCellSize)},${Math.floor(vertex.z / gridCellSize)}`;
-      if (!spatialGrid.has(gridKey)) {
-        spatialGrid.set(gridKey, []);
-      }
-      spatialGrid.get(gridKey)!.push(vertex);
-    }
-    
-    const tempDeviations: number[] = [];
-    
-    // Ultra-fast deviation calculation using spatial grid
-    for (let i = 0; i < queryPositions.length; i += 3) {
-      const queryVertex = new THREE.Vector3(
-        queryPositions[i],
-        queryPositions[i + 1],
-        queryPositions[i + 2]
-      );
-      
-      const gridKey = `${Math.floor(queryVertex.x / gridCellSize)},${Math.floor(queryVertex.y / gridCellSize)},${Math.floor(queryVertex.z / gridCellSize)}`;
-      
-      let minDistance = Infinity;
-      
-      // Check current cell and neighboring cells
-      for (let dx = -1; dx <= 1; dx++) {
-        for (let dy = -1; dy <= 1; dy++) {
-          for (let dz = -1; dz <= 1; dz++) {
-            const neighborKey = `${Math.floor(queryVertex.x / gridCellSize) + dx},${Math.floor(queryVertex.y / gridCellSize) + dy},${Math.floor(queryVertex.z / gridCellSize) + dz}`;
-            const neighbors = spatialGrid.get(neighborKey);
-            
-            if (neighbors) {
-              for (const refVertex of neighbors) {
-                const distance = queryVertex.distanceTo(refVertex);
-                if (distance < minDistance) {
-                  minDistance = distance;
-                  if (distance < 0.0001) break; // Ultra-precise early exit
-                }
-              }
-            }
-          }
-        }
-      }
-      
-      deviations[i / 3] = minDistance;
-      tempDeviations.push(minDistance);
-    }
-    
-    // Calculate statistical measures
-    const sortedDeviations = [...tempDeviations].sort((a, b) => a - b);
-    const min = sortedDeviations[0] || 0;
-    const max = sortedDeviations[sortedDeviations.length - 1] || 0;
-    const average = tempDeviations.reduce((sum, val) => sum + val, 0) / tempDeviations.length || 0;
-    const median = sortedDeviations[Math.floor(sortedDeviations.length / 2)] || 0;
-    
-    const stats = { min, max, average, median };
-    setDeviationStats(stats);
-    
-    return { deviations, stats };
-  };
-
-  // Professional Superimposed Mesh with Advanced Heatmap Analysis
-  const createSuperimposedMesh = (
-    referenceGeometry: THREE.BufferGeometry,
-    queryGeometry: THREE.BufferGeometry
-  ): THREE.Mesh => {
-    // Create perfectly aligned superimposed geometry
-    const superGeometry = queryGeometry.clone();
-    
-    if (showHeatmap && analysisComplete) {
-      // ONLY APPLY COLORS AFTER COMPLETE ANALYSIS PROCESS
-      // Calculate advanced deviations with statistics - FULL COMPARISON COMPLETE
-      const { deviations, stats } = calculateMeshDeviations(queryGeometry, referenceGeometry);
-      
-      // Perfect dual-color deviation mapping - APPLIED ONLY AFTER SUPERIMPOSITION & DIFFERENCE CHECKING
-      const colors = new Float32Array(superGeometry.attributes.position.count * 3);
-      const maxDeviation = stats.max;
-      const deviationThreshold = 0.001; // Ultra-precise threshold for deviation detection
-      
-      for (let i = 0; i < deviations.length; i++) {
-        const deviation = deviations[i];
-        const colorIndex = i * 3;
-        
-        if (deviation <= deviationThreshold) {
-          // TRAINING FILE MATCHES TEST FILE AREA - Mint Green
-          colors[colorIndex] = 0.2;     // R - Pure mint green
-          colors[colorIndex + 1] = 1.0; // G - Pure mint green (full intensity)
-          colors[colorIndex + 2] = 0.7; // B - Pure mint green
-        } else {
-          // TRAINING FILE DOES NOT MATCH TEST FILE AREA - Pink
-          colors[colorIndex] = 1.0;     // R - Pure pink (full intensity)
-          colors[colorIndex + 1] = 0.0; // G - Pure pink
-          colors[colorIndex + 2] = 0.6; // B - Pure pink
-        }
-      }
-      
-      superGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-      
-      // High-performance material for post-analysis visualization
-      const material = new THREE.MeshPhongMaterial({
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.98,
-        wireframe: showWireframe,
-        side: THREE.DoubleSide,
-        flatShading: false,
-        shininess: 15,
-        specular: 0x222222
-      });
-      
-      const mesh = new THREE.Mesh(superGeometry, material);
-      mesh.position.set(0, 0, 0);
-      mesh.userData.isSTLModel = true;
-      mesh.userData.type = 'superimposed';
-      mesh.userData.deviationStats = stats;
-      mesh.userData.analysisComplete = true;
-      
-      return mesh;
-    } else {
-      // Pre-analysis or non-heatmap mode - neutral color
-      const material = new THREE.MeshPhongMaterial({
-        color: 0x888888, // Neutral gray during analysis
-        transparent: true,
-        opacity: 0.85,
-        wireframe: showWireframe,
-        side: THREE.DoubleSide,
-        flatShading: false,
-        shininess: 25,
-        specular: 0x555555
-      });
-      
-      const mesh = new THREE.Mesh(superGeometry, material);
-      mesh.position.set(0, 0, 0);
-      mesh.userData.isSTLModel = true;
-      mesh.userData.type = 'superimposed';
-      mesh.userData.analysisComplete = false;
-      
-      return mesh;
-    }
-  };
-
-  // Store loaded geometries for superimposition
-  const loadedGeometriesRef = useRef<{
-    reference?: THREE.BufferGeometry;
-    query?: THREE.BufferGeometry;
-  }>({});
-
-  // Load and display STL files when they change
-  useEffect(() => {
-    if (!sceneRef.current || !stlLoaderRef.current) return;
-
-    const loadAndDisplaySTL = async () => {
-      setLoadingSTL(true);
-      
-      // Clear existing STL models
-      const objectsToRemove: THREE.Object3D[] = [];
-      sceneRef.current!.traverse((child) => {
-        if (child instanceof THREE.Mesh && child.userData.isSTLModel) {
-          objectsToRemove.push(child);
-        }
-      });
-      objectsToRemove.forEach(obj => {
-        sceneRef.current!.remove(obj);
-        if (obj instanceof THREE.Mesh) {
-          obj.geometry.dispose();
-          if (Array.isArray(obj.material)) {
-            obj.material.forEach(mat => mat.dispose());
-          } else {
-            obj.material.dispose();
-          }
-        }
-      });
-      
-      // Clear loaded meshes reference
-      loadedMeshesRef.current = {};
-      loadedGeometriesRef.current = {};
-
-      try {
-        let referenceGeometry: THREE.BufferGeometry | null = null;
-        let queryGeometry: THREE.BufferGeometry | null = null;
-
-        // Load reference file with precision alignment
-        if (referenceFile) {
-          const refData = await loadSTLFile(referenceFile, 'reference');
-          if (refData) {
-            referenceGeometry = refData.geometry;
-            loadedGeometriesRef.current.reference = refData.geometry;
-            
-            if (!analysisComplete) {
-              // Show reference model separately before analysis - mint green
-              const material = new THREE.MeshLambertMaterial({
-                color: 0x66ff99, // Mint Green
-                transparent: true,
-                opacity: 0.92,
-                wireframe: showWireframe,
-                side: THREE.DoubleSide,
-                flatShading: false
-              });
-              
-              const mesh = new THREE.Mesh(referenceGeometry, material);
-              mesh.position.set(-2.0, 0, 0); // Wider spacing for better visibility
-              mesh.userData.isSTLModel = true;
-              mesh.userData.type = 'reference';
-              mesh.userData.fileName = referenceFile.name;
-              mesh.visible = showReference;
-              
-              loadedMeshesRef.current.reference = mesh;
-              sceneRef.current!.add(mesh);
-            }
-          }
-        }
-
-        // Load query file with precision alignment
-        if (queryFile) {
-          const queryData = await loadSTLFile(queryFile, 'query');
-          if (queryData) {
-            queryGeometry = queryData.geometry;
-            loadedGeometriesRef.current.query = queryData.geometry;
-            
-            if (!analysisComplete) {
-              // Show query model separately before analysis - light mint green
-              const material = new THREE.MeshLambertMaterial({
-                color: 0xb2ffb2, // Light Mint Green (RGB: 178, 255, 178)
-                transparent: true,
-                opacity: 0.92,
-                wireframe: showWireframe,
-                side: THREE.DoubleSide,
-                flatShading: false
-              });
-              
-              const mesh = new THREE.Mesh(queryGeometry, material);
-              mesh.position.set(2.0, 0, 0); // Wider spacing for better visibility
-              mesh.userData.isSTLModel = true;
-              mesh.userData.type = 'query';
-              mesh.userData.fileName = queryFile.name;
-              mesh.visible = showQuery;
-              
-              loadedMeshesRef.current.query = mesh;
-              sceneRef.current!.add(mesh);
-            }
-          }
-        }
-
-        // Create professionally superimposed model when analysis is complete
-        if (analysisComplete && referenceGeometry && queryGeometry) {
-          // Hide individual models during superimposition for clean analysis view
-          if (loadedMeshesRef.current.reference) {
-            loadedMeshesRef.current.reference.visible = false;
-          }
-          if (loadedMeshesRef.current.query) {
-            loadedMeshesRef.current.query.visible = false;
-          }
-          
-          const superimposedMesh = createSuperimposedMesh(referenceGeometry, queryGeometry);
-          loadedMeshesRef.current.superimposed = superimposedMesh;
-          sceneRef.current!.add(superimposedMesh);
-        }
-
-        // Professional camera positioning with optimal viewing angle
-        if (referenceGeometry || queryGeometry) {
-          const box = new THREE.Box3();
-          
-          if (loadedMeshesRef.current.reference && loadedMeshesRef.current.reference.visible) {
-            box.expandByObject(loadedMeshesRef.current.reference);
-          }
-          if (loadedMeshesRef.current.query && loadedMeshesRef.current.query.visible) {
-            box.expandByObject(loadedMeshesRef.current.query);
-          }
-          if (loadedMeshesRef.current.superimposed) {
-            box.expandByObject(loadedMeshesRef.current.superimposed);
-          }
-          
-          const size = box.getSize(new THREE.Vector3());
-          const center = box.getCenter(new THREE.Vector3());
-          const maxSize = Math.max(size.x, size.y, size.z);
-          
-          // Professional camera positioning for medical analysis
-          const distance = analysisComplete ? maxSize * 2.2 : maxSize * 2.8;
-          
-          if (cameraRef.current) {
-            cameraRef.current.position.set(
-              analysisComplete ? 0 : 0,
-              analysisComplete ? 0 : maxSize * 0.3,
-              distance
-            );
-            cameraRef.current.lookAt(center);
-          }
-        }
-
-      } catch (error) {
-        console.error('Error loading STL files:', error);
-      } finally {
-        setLoadingSTL(false);
-      }
-    };
-
-    loadAndDisplaySTL();
-  }, [referenceFile, queryFile, analysisComplete, isHeatmapVisible, isWireframeMode, showReference, showQuery]);
-
-  // Update materials when display options change
-  useEffect(() => {
+  // Clear scene function
+  const clearScene = () => {
     if (!sceneRef.current) return;
 
+    const objectsToRemove: THREE.Object3D[] = [];
     sceneRef.current.traverse((child) => {
-      if (child instanceof THREE.Mesh && child.userData.isSTLModel) {
-        const material = child.material as THREE.MeshPhongMaterial;
-        material.wireframe = showWireframe;
-        
-        // Update visibility
-        if (child.userData.type === 'reference') {
-          child.visible = showReference;
-        } else if (child.userData.type === 'query') {
-          child.visible = showQuery;
+      if (child instanceof THREE.Mesh && child.userData.type) {
+        objectsToRemove.push(child);
+      }
+    });
+
+    objectsToRemove.forEach(obj => {
+      sceneRef.current!.remove(obj);
+      if (obj instanceof THREE.Mesh) {
+        obj.geometry.dispose();
+        if (Array.isArray(obj.material)) {
+          obj.material.forEach(mat => mat.dispose());
+        } else {
+          obj.material.dispose();
         }
       }
     });
-  }, [showWireframe, showReference, showQuery]);
 
+    console.log('Scene cleared');
+  };
+
+  // Load preview meshes (before analysis)
+  const loadPreviewMeshes = async () => {
+    if (!sceneRef.current || !referenceFile || !queryFile) return;
+
+    try {
+      setLoadingSTL(true);
+      console.log('Loading preview meshes...');
+
+      // Clear existing meshes
+      clearScene();
+
+      // Load both files for preview
+      const [trainingData, testData] = await Promise.all([
+        STLProcessor.loadSTLFile(referenceFile),
+        STLProcessor.loadSTLFile(queryFile)
+      ]);
+
+      // Create preview meshes with distinct colors and positions
+      const trainingMesh = STLProcessor.createPreviewMesh(
+        trainingData.geometry,
+        new THREE.Color(0.4, 0.8, 0.4), // Green for training
+        new THREE.Vector3(-3, 0, 0)
+      );
+
+      const testMesh = STLProcessor.createPreviewMesh(
+        testData.geometry,
+        new THREE.Color(0.4, 0.4, 0.8), // Blue for test
+        new THREE.Vector3(3, 0, 0)
+      );
+
+      sceneRef.current.add(trainingMesh);
+      sceneRef.current.add(testMesh);
+
+      console.log('Preview meshes loaded');
+      toast.success('STL files loaded successfully');
+
+    } catch (error) {
+      console.error('Error loading preview meshes:', error);
+      toast.error('Failed to load STL files');
+    } finally {
+      setLoadingSTL(false);
+    }
+  };
+
+  // Perform superimposition analysis
+  const performAnalysis = async () => {
+    if (!sceneRef.current || !referenceFile || !queryFile) return;
+
+    try {
+      setLoadingSTL(true);
+      console.log('Starting superimposition analysis...');
+      toast.info('Starting ICP superimposition analysis...');
+
+      // Clear existing meshes
+      clearScene();
+
+      // Progress callback
+      const progressCallback = (stage: string, progress: number) => {
+        setCurrentStage(stage);
+        setAnalysisProgress(progress);
+        onAnalysisProgress?.(stage, progress);
+        console.log(`Analysis progress: ${stage} - ${progress}%`);
+      };
+
+      // Perform complete superimposition analysis
+      const result = await STLProcessor.performSuperimposition(
+        referenceFile,
+        queryFile,
+        progressCallback
+      );
+
+      // Store result
+      analysisResultRef.current = result;
+
+      // Add superimposed mesh to scene
+      sceneRef.current.add(result.superimposedMesh);
+
+      console.log('Superimposition analysis complete');
+      console.log('ICP Result:', {
+        converged: result.icpResult.converged,
+        iterations: result.icpResult.iterations,
+        error: result.icpResult.error
+      });
+      console.log('Deviation Statistics:', result.deviationAnalysis.statistics);
+
+      // Notify completion
+      onAnalysisComplete?.(result);
+      toast.success('Superimposition analysis completed successfully!');
+
+    } catch (error) {
+      console.error('Error in superimposition analysis:', error);
+      onAnalysisError?.(error as Error);
+      toast.error('Failed to perform superimposition analysis');
+    } finally {
+      setLoadingSTL(false);
+      setCurrentStage('');
+      setAnalysisProgress(0);
+    }
+  };
+
+  // Effect to handle file changes and analysis state
+  useEffect(() => {
+    if (referenceFile && queryFile && !isAnalyzing && !analysisComplete) {
+      // Load preview meshes
+      loadPreviewMeshes();
+    } else if (isAnalyzing && referenceFile && queryFile) {
+      // Perform analysis
+      performAnalysis();
+    } else if (!referenceFile && !queryFile) {
+      // Clear scene if no files
+      clearScene();
+    }
+  }, [referenceFile, queryFile, isAnalyzing]);
+
+  // Handle wireframe mode change
+  useEffect(() => {
+    if (!sceneRef.current || !analysisResultRef.current) return;
+
+    const superimposedMesh = analysisResultRef.current.superimposedMesh;
+    if (superimposedMesh && superimposedMesh.material instanceof THREE.Material) {
+      (superimposedMesh.material as any).wireframe = isWireframeMode;
+    }
+  }, [isWireframeMode]);
+
+  // Reset camera view
   const resetView = () => {
-    if (cameraRef.current && sceneRef.current) {
-      // Reset to optimal viewing position
-      const distance = analysisComplete ? 6 : 8;
-      cameraRef.current.position.set(0, 0, distance);
-      sceneRef.current.rotation.set(0, 0, 0);
-    }
-  };
-
-  const zoomIn = () => {
-    if (cameraRef.current) {
-      cameraRef.current.position.z = Math.max(1, cameraRef.current.position.z - 0.5);
-    }
-  };
-
-  const zoomOut = () => {
-    if (cameraRef.current) {
-      cameraRef.current.position.z = Math.min(20, cameraRef.current.position.z + 0.5);
-    }
+    if (!cameraRef.current) return;
+    
+    cameraRef.current.position.set(5, 5, 5);
+    cameraRef.current.lookAt(0, 0, 0);
+    toast.info('Camera view reset');
   };
 
   return (
-    <Card className="h-full flex flex-col">
-      {/* Professional Header with Enhanced Controls */}
-      <div className="p-6 border-b border-border bg-gradient-to-r from-surface to-background">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-semibold text-foreground mb-1">Professional 3D Superimposition Analysis</h3>
-            <p className="text-sm text-muted-foreground">
-              {analysisComplete ? 'Precision superimposition analysis completed with statistical accuracy' : 
-               isAnalyzing ? 'Processing advanced geometric comparison...' : 
-               'Upload STL files for professional superimposition analysis'}
-            </p>
-            {deviationStats && (
-              <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                <span>Max: {deviationStats.max.toFixed(4)}mm</span>
-                <span>Avg: {deviationStats.average.toFixed(4)}mm</span>
-                <span>Min: {deviationStats.min.toFixed(4)}mm</span>
+    <Card className="h-[600px] viewer-container overflow-hidden">
+      <div className="h-full flex flex-col">
+        {/* Header */}
+        <div className="p-4 border-b border-border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Move3D className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold text-foreground">STL Viewer</h3>
               </div>
-            )}
-          </div>
-          
-          <div className="flex items-center gap-3">
-            {analysisComplete && (
-              <Badge variant="outline" className="bg-success/15 text-success border-success font-medium px-3 py-1">
-                ✓ Analysis Complete
-              </Badge>
-            )}
-            {isAnalyzing && (
-              <Badge variant="outline" className="bg-primary/15 text-primary border-primary font-medium px-3 py-1">
-                <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
-                Analyzing...
-              </Badge>
-            )}
-          </div>
-        </div>
-
-        {/* Professional Control Panel */}
-        <div className="flex items-center justify-between gap-4 mt-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 bg-surface border border-border rounded-lg p-1.5">
-              <Button variant="ghost" size="sm" onClick={resetView} className="hover:bg-primary/10">
+              {analysisComplete && analysisResultRef.current && (
+                <Badge variant="default" className="bg-success text-success-foreground">
+                  Analysis Complete
+                </Badge>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={resetView}
+                className="gap-2"
+              >
                 <RotateCcw className="w-4 h-4" />
-                <span className="ml-1 text-xs">Reset</span>
-              </Button>
-              <Button variant="ghost" size="sm" onClick={zoomIn} className="hover:bg-primary/10">
-                <ZoomIn className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="sm" onClick={zoomOut} className="hover:bg-primary/10">
-                <ZoomOut className="w-4 h-4" />
+                Reset View
               </Button>
             </div>
+          </div>
 
-            {!analysisComplete && (
-              <div className="flex items-center gap-1 bg-surface border border-border rounded-lg p-1.5">
-                <Button 
-                  variant={showReference ? "default" : "ghost"} 
-                  size="sm" 
-                  onClick={() => setShowReference(!showReference)}
-                  className="text-xs"
-                >
-                  {showReference ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  <span className="ml-1">Reference</span>
-                </Button>
-                <Button 
-                  variant={showQuery ? "default" : "ghost"} 
-                  size="sm" 
-                  onClick={() => setShowQuery(!showQuery)}
-                  className="text-xs"
-                >
-                  {showQuery ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  <span className="ml-1">Query</span>
-                </Button>
+          {/* Analysis Progress */}
+          {isAnalyzing && (
+            <div className="mt-3 space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">{currentStage}</span>
+                <span className="text-muted-foreground">{analysisProgress}%</span>
               </div>
-            )}
-          </div>
-
-            {analysisComplete && (
-              <div className="flex items-center gap-1 bg-surface border border-border rounded-lg p-1.5">
-                <Button 
-                  variant={showHeatmap ? "default" : "ghost"} 
-                  size="sm" 
-                  className="text-xs font-medium"
-                >
-                  <Palette className="w-4 h-4" />
-                  <span className="ml-1">Deviation Map</span>
-                </Button>
-                <Button 
-                  variant={showWireframe ? "default" : "ghost"} 
-                  size="sm" 
-                  className="text-xs"
-                >
-                  <Grid3X3 className="w-4 h-4" />
-                  <span className="ml-1">Wireframe</span>
-                </Button>
-              </div>
-            )}
-        </div>
-      </div>
-
-      {/* 3D Viewer */}
-      <div className="flex-1 relative">
-        <div 
-          ref={containerRef} 
-          className="w-full h-full viewer-container"
-          style={{ minHeight: '400px' }}
-        />
-        
-        {!referenceFile && !queryFile && (
-          <div className="absolute inset-0 flex items-center justify-center bg-surface/50">
-            <div className="text-center space-y-2">
-              <Move3D className="w-12 h-12 text-muted-foreground mx-auto" />
-              <p className="text-muted-foreground">Upload STL files to visualize</p>
-            </div>
-          </div>
-        )}
-
-        {loadingSTL && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-            <div className="text-center space-y-4">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-foreground font-medium">Loading STL files...</p>
-              <p className="text-sm text-muted-foreground">Parsing 3D geometry</p>
-            </div>
-          </div>
-        )}
-
-        {isAnalyzing && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-            <div className="text-center space-y-4">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-foreground font-medium">Performing superimposition analysis...</p>
-              <p className="text-sm text-muted-foreground">This may take a few moments</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Professional Deviation Analysis Legend */}
-      {analysisComplete && showHeatmap && deviationStats && (
-        <div className="p-5 border-t border-border bg-gradient-to-r from-surface/50 to-background/50">
-            <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="font-medium text-foreground">Precision Deviation Analysis</h4>
-              <span className="text-xs text-muted-foreground">Range: {deviationStats.min.toFixed(4)}mm - {deviationStats.max.toFixed(4)}mm</span>
-            </div>
-            
-            <div className="flex items-center justify-center gap-8">
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-lg border-2 border-border shadow-sm" style={{backgroundColor: 'rgb(178, 255, 178)'}} />
-                <div className="text-sm">
-                  <div className="font-semibold text-foreground">No Deviation</div>
-                  <div className="text-muted-foreground">Light Mint Green</div>
-                </div>
-              </div>
-              
-              <div className="w-px h-8 bg-border" />
-              
-              <div className="flex items-center gap-3">
+              <div className="w-full bg-secondary rounded-full h-2">
                 <div 
-                  className="w-6 h-6 rounded-lg border-2 border-border shadow-sm"
-                  style={{
-                    background: 'linear-gradient(135deg, rgb(139, 69, 139) 0%, rgb(85, 42, 85) 100%)'
-                  }}
+                  className="bg-primary h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${analysisProgress}%` }}
                 />
-                <div className="text-sm">
-                  <div className="font-semibold text-foreground">Has Deviation</div>
-                  <div className="text-muted-foreground">Dark Gradient Magenta</div>
-                </div>
               </div>
             </div>
-            
-            <div className="text-center">
-              <p className="text-xs text-muted-foreground">
-                Intensity increases with deviation magnitude • Threshold: 0.001mm
-              </p>
+          )}
+        </div>
+
+        {/* 3D Viewer */}
+        <div className="flex-1 relative">
+          <div 
+            ref={containerRef} 
+            className="w-full h-full bg-surface"
+            style={{ minHeight: '400px' }}
+          />
+          
+          {/* Loading overlay */}
+          {loadingSTL && (
+            <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
+              <div className="text-center space-y-2">
+                <RefreshCw className="w-8 h-8 text-primary animate-spin mx-auto" />
+                <p className="text-sm text-muted-foreground">
+                  {currentStage || 'Loading STL files...'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Instructions overlay */}
+          {!referenceFile || !queryFile ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center space-y-2 text-muted-foreground">
+                <Grid3X3 className="w-12 h-12 mx-auto opacity-50" />
+                <p className="text-lg font-medium">Upload STL Files</p>
+                <p className="text-sm">Upload both training and test STL files to begin</p>
+              </div>
+            </div>
+          ) : !analysisComplete && !isAnalyzing && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center space-y-2 text-muted-foreground">
+                <Eye className="w-12 h-12 mx-auto opacity-50" />
+                <p className="text-lg font-medium">Files Loaded</p>
+                <p className="text-sm">Ready for superimposition analysis</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Analysis Results Summary */}
+        {analysisComplete && analysisResultRef.current && (
+          <div className="p-4 border-t border-border bg-surface/50">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div className="text-center">
+                <p className="text-muted-foreground">ICP Iterations</p>
+                <p className="font-semibold text-foreground">
+                  {analysisResultRef.current.icpResult.iterations}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-muted-foreground">Alignment Error</p>
+                <p className="font-semibold text-foreground">
+                  {analysisResultRef.current.icpResult.error.toFixed(6)}
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-muted-foreground">Matching Areas</p>
+                <p className="font-semibold text-success">
+                  {analysisResultRef.current.deviationAnalysis.statistics.matchingPercentage.toFixed(1)}%
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-muted-foreground">Deviation Areas</p>
+                <p className="font-semibold text-destructive">
+                  {analysisResultRef.current.deviationAnalysis.statistics.deviationPercentage.toFixed(1)}%
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </Card>
   );
 };
