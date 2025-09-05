@@ -367,12 +367,12 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         const colorIndex = i * 3;
         
         if (deviation <= deviationThreshold) {
-          // NO DEVIATION - Pure Mint Green (ONLY after complete comparison)
+          // TRAINING FILE MATCHES TEST FILE AREA - Mint Green
           colors[colorIndex] = 0.2;     // R - Pure mint green
           colors[colorIndex + 1] = 1.0; // G - Pure mint green (full intensity)
           colors[colorIndex + 2] = 0.7; // B - Pure mint green
         } else {
-          // HAS DEVIATION - Pure Pink (ONLY after complete comparison)
+          // TRAINING FILE DOES NOT MATCH TEST FILE AREA - Pink
           colors[colorIndex] = 1.0;     // R - Pure pink (full intensity)
           colors[colorIndex + 1] = 0.0; // G - Pure pink
           colors[colorIndex + 2] = 0.6; // B - Pure pink
