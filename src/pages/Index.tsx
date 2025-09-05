@@ -19,7 +19,6 @@ import { AnalysisProcessor } from '@/components/AnalysisProcessor';
 import { HeatmapLegend } from '@/components/HeatmapLegend';
 import { ViewerControls } from '@/components/ViewerControls';
 import { AnalysisReport } from '@/components/AnalysisReport';
-import { SuperimpositionResult } from '@/utils/stlProcessor';
 
 const Index = () => {
   const [referenceFile, setReferenceFile] = useState<File | null>(null);
@@ -28,9 +27,6 @@ const Index = () => {
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [showProcessor, setShowProcessor] = useState(false);
   const [metrics, setMetrics] = useState(null);
-  const [analysisResult, setAnalysisResult] = useState<SuperimpositionResult | null>(null);
-  const [analysisStage, setAnalysisStage] = useState<string>('');
-  const [analysisProgress, setAnalysisProgress] = useState<number>(0);
   
   // Viewer controls state
   const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
@@ -206,19 +202,6 @@ const Index = () => {
                   isHeatmapVisible={isHeatmapVisible}
                   isWireframeMode={isWireframeMode}
                   viewMode={viewMode}
-                  onAnalysisProgress={(stage, progress) => {
-                    setAnalysisStage(stage);
-                    setAnalysisProgress(progress);
-                  }}
-                  onAnalysisComplete={(result) => {
-                    setAnalysisResult(result);
-                    handleAnalysisComplete();
-                  }}
-                  onAnalysisError={(error) => {
-                    console.error('Analysis error:', error);
-                    toast.error('Analysis failed: ' + error.message);
-                    setIsAnalyzing(false);
-                  }}
                 />
               </div>
 
