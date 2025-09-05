@@ -352,11 +352,12 @@ export const STLViewer: React.FC<STLViewerProps> = ({
     // Create perfectly aligned superimposed geometry
     const superGeometry = queryGeometry.clone();
     
-    if (showHeatmap) {
-      // Calculate advanced deviations with statistics
+    if (showHeatmap && analysisComplete) {
+      // ONLY APPLY COLORS AFTER COMPLETE ANALYSIS PROCESS
+      // Calculate advanced deviations with statistics - FULL COMPARISON COMPLETE
       const { deviations, stats } = calculateMeshDeviations(queryGeometry, referenceGeometry);
       
-      // Perfect dual-color deviation mapping as requested
+      // Perfect dual-color deviation mapping - APPLIED ONLY AFTER SUPERIMPOSITION & DIFFERENCE CHECKING
       const colors = new Float32Array(superGeometry.attributes.position.count * 3);
       const maxDeviation = stats.max;
       const deviationThreshold = 0.001; // Ultra-precise threshold for deviation detection
@@ -366,12 +367,12 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         const colorIndex = i * 3;
         
         if (deviation <= deviationThreshold) {
-          // NO DEVIATION - Pure Mint Green (exact match to reference image)
+          // NO DEVIATION - Pure Mint Green (ONLY after complete comparison)
           colors[colorIndex] = 0.2;     // R - Pure mint green
           colors[colorIndex + 1] = 1.0; // G - Pure mint green (full intensity)
           colors[colorIndex + 2] = 0.7; // B - Pure mint green
         } else {
-          // HAS DEVIATION - Pure Pink (exact match to reference image)
+          // HAS DEVIATION - Pure Pink (ONLY after complete comparison)
           colors[colorIndex] = 1.0;     // R - Pure pink (full intensity)
           colors[colorIndex + 1] = 0.0; // G - Pure pink
           colors[colorIndex + 2] = 0.6; // B - Pure pink
@@ -380,7 +381,7 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       
       superGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
       
-      // High-performance material for accurate visualization
+      // High-performance material for post-analysis visualization
       const material = new THREE.MeshPhongMaterial({
         vertexColors: true,
         transparent: true,
@@ -397,14 +398,15 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       mesh.userData.isSTLModel = true;
       mesh.userData.type = 'superimposed';
       mesh.userData.deviationStats = stats;
+      mesh.userData.analysisComplete = true;
       
       return mesh;
     } else {
-      // Professional unified model with mint green base color
+      // Pre-analysis or non-heatmap mode - neutral color
       const material = new THREE.MeshPhongMaterial({
-        color: 0x66ff99, // Mint Green
+        color: 0x888888, // Neutral gray during analysis
         transparent: true,
-        opacity: 0.95,
+        opacity: 0.85,
         wireframe: showWireframe,
         side: THREE.DoubleSide,
         flatShading: false,
@@ -416,6 +418,7 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       mesh.position.set(0, 0, 0);
       mesh.userData.isSTLModel = true;
       mesh.userData.type = 'superimposed';
+      mesh.userData.analysisComplete = false;
       
       return mesh;
     }
