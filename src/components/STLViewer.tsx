@@ -366,24 +366,22 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         const colorIndex = i * 3;
         
         if (deviation <= deviationThreshold) {
-          // NO DEVIATION - Light Mint Green (RGB: 178, 255, 178 - Apollo Green Light)
-          colors[colorIndex] = 178 / 255;     // R - Light mint green
-          colors[colorIndex + 1] = 255 / 255; // G - Light mint green  
-          colors[colorIndex + 2] = 178 / 255; // B - Light mint green
+          // MATCHED AREA - Mint Green (RGB: 152, 251, 152)
+          colors[colorIndex] = 152 / 255;     // R - mint green
+          colors[colorIndex + 1] = 251 / 255; // G - mint green  
+          colors[colorIndex + 2] = 152 / 255; // B - mint green
         } else {
-          // HAS DEVIATION - Dark Pink/Magenta for high contrast
+          // MISMATCHED AREA - Pink (RGB: 255, 182, 193 to RGB: 255, 105, 180)
           const intensity = Math.min(deviation / (maxDeviation || 1), 1);
           
-          // Dark gradient pink colors for deviation areas
-          const baseR = 139 / 255;  // Dark magenta red
-          const baseG = 69 / 255;   // Dark magenta green
-          const baseB = 139 / 255;  // Dark magenta blue
+          // Pink gradient colors for mismatched areas
+          const lightPink = { r: 255 / 255, g: 182 / 255, b: 193 / 255 }; // Light pink
+          const hotPink = { r: 255 / 255, g: 105 / 255, b: 180 / 255 };   // Hot pink
           
-          // Apply intensity (darker = more deviation)
-          const darknessFactor = 0.3 + 0.7 * intensity; // Gets darker with more deviation
-          colors[colorIndex] = baseR * darknessFactor;     // R
-          colors[colorIndex + 1] = baseG * darknessFactor; // G
-          colors[colorIndex + 2] = baseB * darknessFactor; // B
+          // Interpolate between light pink and hot pink based on intensity
+          colors[colorIndex] = lightPink.r + (hotPink.r - lightPink.r) * intensity;     // R
+          colors[colorIndex + 1] = lightPink.g + (hotPink.g - lightPink.g) * intensity; // G
+          colors[colorIndex + 2] = lightPink.b + (hotPink.b - lightPink.b) * intensity; // B
         }
       }
       
@@ -776,10 +774,10 @@ export const STLViewer: React.FC<STLViewerProps> = ({
             
             <div className="flex items-center justify-center gap-8">
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-lg border-2 border-border shadow-sm" style={{backgroundColor: 'rgb(178, 255, 178)'}} />
+                <div className="w-6 h-6 rounded-lg border-2 border-border shadow-sm" style={{backgroundColor: 'rgb(152, 251, 152)'}} />
                 <div className="text-sm">
-                  <div className="font-semibold text-foreground">No Deviation</div>
-                  <div className="text-muted-foreground">Light Mint Green</div>
+                  <div className="font-semibold text-foreground">Matched Area</div>
+                  <div className="text-muted-foreground">Mint Green</div>
                 </div>
               </div>
               
@@ -789,12 +787,12 @@ export const STLViewer: React.FC<STLViewerProps> = ({
                 <div 
                   className="w-6 h-6 rounded-lg border-2 border-border shadow-sm"
                   style={{
-                    background: 'linear-gradient(135deg, rgb(139, 69, 139) 0%, rgb(85, 42, 85) 100%)'
+                    background: 'linear-gradient(135deg, rgb(255, 182, 193) 0%, rgb(255, 105, 180) 100%)'
                   }}
                 />
                 <div className="text-sm">
-                  <div className="font-semibold text-foreground">Has Deviation</div>
-                  <div className="text-muted-foreground">Dark Gradient Magenta</div>
+                  <div className="font-semibold text-foreground">Mismatched Area</div>
+                  <div className="text-muted-foreground">Pink Gradient</div>
                 </div>
               </div>
             </div>
