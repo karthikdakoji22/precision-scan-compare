@@ -299,19 +299,31 @@ export const STLViewer: React.FC<STLViewerProps> = ({
       for (let i = 0; i < deviations.length; i++) {
         const deviation = deviations[i];
         const colorIndex = i * 3;
+      //   if (deviation <= deviationThreshold) {
+      //     // Mint green gradient (No deviation)
+      //     // You can customize this gradient mapping as needed
+      //     colors[colorIndex] = 0.36 + 0.08 * (deviation / deviationThreshold);  // R
+      //     colors[colorIndex + 1] = 0.97;                                       // G
+      //     colors[colorIndex + 2] = 0.74 + 0.15 * (deviation / deviationThreshold); // B
+      //   } else {
+      //     // Pink dark gradient (Has deviation)
+      //     colors[colorIndex] = 0.65 + 0.35 * (deviation / maxDeviation);     // R
+      //     colors[colorIndex + 1] = 0.13 + 0.10 * (deviation / maxDeviation); // G
+      //     colors[colorIndex + 2] = 0.36 + 0.22 * (deviation / maxDeviation); // B
+      //   }
+      // }
         if (deviation <= deviationThreshold) {
-          // Mint green gradient (No deviation)
-          // You can customize this gradient mapping as needed
-          colors[colorIndex] = 0.36 + 0.08 * (deviation / deviationThreshold);  // R
-          colors[colorIndex + 1] = 0.97;                                       // G
-          colors[colorIndex + 2] = 0.74 + 0.15 * (deviation / deviationThreshold); // B
-        } else {
-          // Pink dark gradient (Has deviation)
-          colors[colorIndex] = 0.65 + 0.35 * (deviation / maxDeviation);     // R
-          colors[colorIndex + 1] = 0.13 + 0.10 * (deviation / maxDeviation); // G
-          colors[colorIndex + 2] = 0.36 + 0.22 * (deviation / maxDeviation); // B
-        }
-      }
+  // NO DEVIATION - Mint Green
+  colors[colorIndex] = 178 / 255;
+  colors[colorIndex + 1] = 255 / 255;
+  colors[colorIndex + 2] = 178 / 255;
+} else {
+  // HAS DEVIATION - Pink
+  colors[colorIndex] = 255 / 255;
+  colors[colorIndex + 1] = 105 / 255;
+  colors[colorIndex + 2] = 180 / 255;
+}
+
       superGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
       const material = new THREE.MeshPhongMaterial({
         vertexColors: true,
