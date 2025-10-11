@@ -29,7 +29,6 @@ const Index = () => {
   const [metrics, setMetrics] = useState(null);
   
   // Viewer controls state
-  const [isHeatmapVisible, setIsHeatmapVisible] = useState(true);
   const [isWireframeMode, setIsWireframeMode] = useState(false);
   const [viewMode, setViewMode] = useState<'reference' | 'query' | 'superimposed'>('superimposed');
 
@@ -93,11 +92,6 @@ const Index = () => {
 
   const handleZoomOut = () => {
     toast.info('Zooming out...');
-  };
-
-  const handleToggleHeatmap = () => {
-    setIsHeatmapVisible(!isHeatmapVisible);
-    toast.info(`Heatmap ${!isHeatmapVisible ? 'enabled' : 'disabled'}`);
   };
 
   const handleToggleWireframe = () => {
@@ -181,95 +175,87 @@ const Index = () => {
 
         {/* Visualization Section */}
         {(referenceFile || queryFile) && (
-          <section className="space-y-6">
+          <section className="space-y-8">
             <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold text-foreground">
+              <h2 className="text-3xl font-bold text-foreground">
                 3D Visualization & Results
               </h2>
               <p className="text-muted-foreground">
-                Interactive 3D viewer with heatmap overlay showing deviation analysis
+                Interactive 3D viewer with superimposition analysis
               </p>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-              {/* 3D Viewer - Takes main space */}
-              <div className="xl:col-span-2">
+            {/* Centered 3D Viewer */}
+            <div className="flex justify-center">
+              <div className="w-full max-w-5xl">
                 <STLViewer
                   referenceFile={referenceFile}
                   queryFile={queryFile}
                   isAnalyzing={isAnalyzing}
                   analysisComplete={analysisComplete}
-                  isHeatmapVisible={isHeatmapVisible}
+                  isHeatmapVisible={false}
                   isWireframeMode={isWireframeMode}
                   viewMode={viewMode}
                 />
               </div>
+            </div>
 
-              {/* Controls and Info */}
-              <div className="space-y-4">
-                <ViewerControls
-                  onReset={handleResetView}
-                  onZoomIn={handleZoomIn}
-                  onZoomOut={handleZoomOut}
-                  onToggleHeatmap={handleToggleHeatmap}
-                  onToggleWireframe={handleToggleWireframe}
-                  onFullscreen={handleFullscreen}
-                  isHeatmapVisible={isHeatmapVisible}
-                  isWireframeMode={isWireframeMode}
-                  viewMode={viewMode}
-                  onViewModeChange={setViewMode}
-                />
+            {/* Controls and Info Below Viewer */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {/* Viewer Controls */}
+              <ViewerControls
+                onReset={handleResetView}
+                onZoomIn={handleZoomIn}
+                onZoomOut={handleZoomOut}
+                onToggleHeatmap={() => {}}
+                onToggleWireframe={handleToggleWireframe}
+                onFullscreen={handleFullscreen}
+                isHeatmapVisible={false}
+                isWireframeMode={isWireframeMode}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+              />
 
-                {analysisComplete && (
-                  <HeatmapLegend
-                    minDeviation={0.0}
-                    maxDeviation={0.45}
-                    unit="mm"
-                  />
-                )}
-              </div>
+              {/* Analysis Status */}
+              <Card className="p-6 bg-card border-border">
+                <h3 className="font-semibold text-foreground mb-4 text-lg">Analysis Status</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Reference File</span>
+                    <Badge variant={referenceFile ? "default" : "outline"} className="font-medium">
+                      {referenceFile ? "Loaded" : "Pending"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Query File</span>
+                    <Badge variant={queryFile ? "default" : "outline"} className="font-medium">
+                      {queryFile ? "Loaded" : "Pending"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Analysis</span>
+                    <Badge variant={
+                      analysisComplete ? "default" : 
+                      isAnalyzing ? "outline" : "secondary"
+                    } className="font-medium">
+                      {analysisComplete ? "Complete" : 
+                       isAnalyzing ? "Processing" : "Ready"}
+                    </Badge>
+                  </div>
+                </div>
+              </Card>
 
               {/* Analysis Report */}
-              <div className="space-y-4">
-                <Card className="p-4">
-                  <h3 className="font-semibold text-foreground mb-3">Analysis Status</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Reference File</span>
-                      <Badge variant={referenceFile ? "default" : "outline"}>
-                        {referenceFile ? "Loaded" : "Pending"}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Query File</span>
-                      <Badge variant={queryFile ? "default" : "outline"}>
-                        {queryFile ? "Loaded" : "Pending"}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Analysis</span>
-                      <Badge variant={
-                        analysisComplete ? "default" : 
-                        isAnalyzing ? "outline" : "secondary"
-                      }>
-                        {analysisComplete ? "Complete" : 
-                         isAnalyzing ? "Processing" : "Ready"}
-                      </Badge>
-                    </div>
-                  </div>
-                </Card>
-
-                {analysisComplete && (
-                  <AnalysisReport
-                    referenceFile={referenceFile}
-                    queryFile={queryFile}
-                    metrics={metrics}
-                    onGenerateReport={handleGenerateReport}
-                    onExportData={handleExportData}
-                    onShareReport={handleShareReport}
-                  />
-                )}
-              </div>
+              {analysisComplete && (
+                <AnalysisReport
+                  referenceFile={referenceFile}
+                  queryFile={queryFile}
+                  metrics={metrics}
+                  onGenerateReport={handleGenerateReport}
+                  onExportData={handleExportData}
+                  onShareReport={handleShareReport}
+                />
+              )}
             </div>
           </section>
         )}

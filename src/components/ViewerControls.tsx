@@ -100,15 +100,6 @@ export const ViewerControls: React.FC<ViewerControlsProps> = ({
           <label className="text-sm font-medium text-foreground">Display Options</label>
           <div className="space-y-2">
             <Button
-              variant={isHeatmapVisible ? 'default' : 'outline'}
-              size="sm"
-              onClick={onToggleHeatmap}
-              className="w-full justify-start gap-2"
-            >
-              <Palette className="w-4 h-4" />
-              Heatmap {isHeatmapVisible ? 'On' : 'Off'}
-            </Button>
-            <Button
               variant={isWireframeMode ? 'default' : 'outline'}
               size="sm"
               onClick={onToggleWireframe}
@@ -138,9 +129,9 @@ export const ViewerControls: React.FC<ViewerControlsProps> = ({
           </Badge>
         </div>
         <div className="flex items-center justify-between text-xs mt-1">
-          <span className="text-muted-foreground">Heatmap:</span>
-          <Badge variant={isHeatmapVisible ? 'default' : 'outline'} className="text-xs">
-            {isHeatmapVisible ? 'Active' : 'Inactive'}
+          <span className="text-muted-foreground">View Mode:</span>
+          <Badge variant="default" className="text-xs capitalize">
+            {viewMode}
           </Badge>
         </div>
       </div>
