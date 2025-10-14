@@ -868,7 +868,6 @@ export const STLViewer: React.FC<STLViewerProps> = ({
                 <div className="w-6 h-6 rounded-lg border-2 border-border shadow-sm" style={{backgroundColor: 'rgb(152, 251, 152)'}} />
                 <div className="text-sm">
                   <div className="font-semibold text-foreground">Matched Area</div>
-                  <div className="text-muted-foreground">Mint Green</div>
                 </div>
               </div>
               
@@ -883,7 +882,6 @@ export const STLViewer: React.FC<STLViewerProps> = ({
                 />
                 <div className="text-sm">
                   <div className="font-semibold text-foreground">Mismatched Area</div>
-                  <div className="text-muted-foreground">Pink Gradient</div>
                 </div>
               </div>
             </div>
