@@ -109,16 +109,16 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-surface to-background">
       <Header />
 
-      <main className="container mx-auto px-6 py-8 space-y-8">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16 max-w-7xl">
         {/* Upload Section */}
-        <section className="space-y-6">
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold text-foreground">
+        <section className="space-y-8">
+          <div className="text-center space-y-3">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
               Upload STL Files for Analysis
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-3xl mx-auto text-base sm:text-lg leading-relaxed">
               Upload your reference and query STL files to perform precise superimposition analysis 
-              with detailed deviation metrics and heatmap visualization.
+              with detailed deviation metrics and visualization.
             </p>
           </div>
 
@@ -144,8 +144,8 @@ const Index = () => {
 
           {/* Analysis Controls */}
           <div className="flex justify-center">
-            <Card className="p-6 w-full max-w-md">
-              <div className="text-center space-y-4">
+            <Card className="p-8 w-full max-w-lg shadow-lg border-2">
+              <div className="text-center space-y-6">
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <div className={`w-2 h-2 rounded-full ${referenceFile ? 'bg-success' : 'bg-muted'}`} />
                   Reference STL
@@ -175,33 +175,35 @@ const Index = () => {
 
         {/* Visualization Section */}
         {(referenceFile || queryFile) && (
-          <section className="space-y-8">
-            <div className="text-center space-y-2">
-              <h2 className="text-3xl font-bold text-foreground">
+          <section className="space-y-10">
+            <div className="text-center space-y-3">
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
                 3D Visualization & Results
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-base sm:text-lg">
                 Interactive 3D viewer with superimposition analysis
               </p>
             </div>
 
-            {/* Centered 3D Viewer */}
-            <div className="flex justify-center">
-              <div className="w-full max-w-5xl">
-                <STLViewer
-                  referenceFile={referenceFile}
-                  queryFile={queryFile}
-                  isAnalyzing={isAnalyzing}
-                  analysisComplete={analysisComplete}
-                  isHeatmapVisible={false}
-                  isWireframeMode={isWireframeMode}
-                  viewMode={viewMode}
-                />
+            {/* Centered 3D Viewer with Perfect Padding */}
+            <div className="flex justify-center px-4 sm:px-6">
+              <div className="w-full max-w-6xl">
+                <div className="rounded-xl overflow-hidden shadow-2xl border-2 border-border">
+                  <STLViewer
+                    referenceFile={referenceFile}
+                    queryFile={queryFile}
+                    isAnalyzing={isAnalyzing}
+                    analysisComplete={analysisComplete}
+                    isHeatmapVisible={false}
+                    isWireframeMode={isWireframeMode}
+                    viewMode={viewMode}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Controls and Info Below Viewer */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {/* Controls and Info Below Viewer - Perfectly Aligned */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 sm:px-6">
               {/* Viewer Controls */}
               <ViewerControls
                 onReset={handleResetView}
@@ -217,9 +219,9 @@ const Index = () => {
               />
 
               {/* Analysis Status */}
-              <Card className="p-6 bg-card border-border">
-                <h3 className="font-semibold text-foreground mb-4 text-lg">Analysis Status</h3>
-                <div className="space-y-4">
+              <Card className="p-6 bg-card border-2 shadow-lg">
+                <h3 className="font-semibold text-foreground mb-6 text-lg">Analysis Status</h3>
+                <div className="space-y-5">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Reference File</span>
                     <Badge variant={referenceFile ? "default" : "outline"} className="font-medium">
@@ -262,12 +264,12 @@ const Index = () => {
 
         {/* Metrics Section */}
         {(analysisComplete || isAnalyzing || (referenceFile && queryFile)) && (
-          <section className="space-y-6">
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold text-foreground">
+          <section className="space-y-8 px-4 sm:px-6">
+            <div className="text-center space-y-3">
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
                 Analysis Metrics & Results
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-base sm:text-lg max-w-3xl mx-auto">
                 Detailed quantitative analysis of deviation measurements
               </p>
             </div>

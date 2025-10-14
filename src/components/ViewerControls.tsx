@@ -41,14 +41,14 @@ export const ViewerControls: React.FC<ViewerControlsProps> = ({
   onViewModeChange
 }) => {
   return (
-    <Card className="p-4 space-y-4">
+    <Card className="p-6 space-y-6 border-2 shadow-lg">
       <div>
-        <h4 className="font-semibold text-foreground mb-3">Viewer Controls</h4>
+        <h4 className="font-semibold text-foreground mb-5 text-lg">Viewer Controls</h4>
         
         {/* View Mode Selection */}
-        <div className="space-y-2 mb-4">
-          <label className="text-sm font-medium text-foreground">View Mode</label>
-          <div className="grid grid-cols-1 gap-1">
+        <div className="space-y-3 mb-6">
+          <label className="text-sm font-semibold text-foreground">View Mode</label>
+          <div className="grid grid-cols-1 gap-2">
             <Button
               variant={viewMode === 'reference' ? 'default' : 'outline'}
               size="sm"
@@ -77,8 +77,8 @@ export const ViewerControls: React.FC<ViewerControlsProps> = ({
         </div>
 
         {/* Navigation Controls */}
-        <div className="space-y-2 mb-4">
-          <label className="text-sm font-medium text-foreground">Navigation</label>
+        <div className="space-y-3 mb-6">
+          <label className="text-sm font-semibold text-foreground">Navigation</label>
           <div className="grid grid-cols-2 gap-2">
             <Button variant="outline" size="sm" onClick={onZoomIn} className="gap-2">
               <ZoomIn className="w-4 h-4" />
@@ -96,8 +96,8 @@ export const ViewerControls: React.FC<ViewerControlsProps> = ({
         </div>
 
         {/* Display Options */}
-        <div className="space-y-2 mb-4">
-          <label className="text-sm font-medium text-foreground">Display Options</label>
+        <div className="space-y-3 mb-6">
+          <label className="text-sm font-semibold text-foreground">Display Options</label>
           <div className="space-y-2">
             <Button
               variant={isWireframeMode ? 'default' : 'outline'}
@@ -121,16 +121,16 @@ export const ViewerControls: React.FC<ViewerControlsProps> = ({
       </div>
 
       {/* Status Indicators */}
-      <div className="pt-3 border-t border-border">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Render Mode:</span>
-          <Badge variant="outline" className="text-xs">
+      <div className="pt-5 border-t border-border">
+        <div className="flex items-center justify-between text-sm py-2">
+          <span className="text-muted-foreground font-medium">Render Mode:</span>
+          <Badge variant="outline" className="text-xs font-semibold">
             {isWireframeMode ? 'Wireframe' : 'Solid'}
           </Badge>
         </div>
-        <div className="flex items-center justify-between text-xs mt-1">
-          <span className="text-muted-foreground">View Mode:</span>
-          <Badge variant="default" className="text-xs capitalize">
+        <div className="flex items-center justify-between text-sm py-2">
+          <span className="text-muted-foreground font-medium">View Mode:</span>
+          <Badge variant="default" className="text-xs capitalize font-semibold">
             {viewMode}
           </Badge>
         </div>
