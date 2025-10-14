@@ -194,7 +194,7 @@ const Index = () => {
                     queryFile={queryFile}
                     isAnalyzing={isAnalyzing}
                     analysisComplete={analysisComplete}
-                    isHeatmapVisible={false}
+                    isHeatmapVisible={true}
                     isWireframeMode={isWireframeMode}
                     viewMode={viewMode}
                   />
@@ -212,7 +212,7 @@ const Index = () => {
                 onToggleHeatmap={() => {}}
                 onToggleWireframe={handleToggleWireframe}
                 onFullscreen={handleFullscreen}
-                isHeatmapVisible={false}
+                isHeatmapVisible={true}
                 isWireframeMode={isWireframeMode}
                 viewMode={viewMode}
                 onViewModeChange={setViewMode}
