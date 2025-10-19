@@ -456,22 +456,22 @@ export const STLViewer: React.FC<STLViewerProps> = ({
         const colorIndex = i * 3;
         
         if (deviation <= deviationThreshold) {
-          // MATCHED AREA - Mint Green (RGB: 152, 251, 152)
-          colors[colorIndex] = 152 / 255;     // R - mint green
-          colors[colorIndex + 1] = 251 / 255; // G - mint green  
-          colors[colorIndex + 2] = 152 / 255; // B - mint green
+          // MATCHED AREA - Muted Olive Green (RGB: 107, 142, 107)
+          colors[colorIndex] = 107 / 255;     // R - olive green
+          colors[colorIndex + 1] = 142 / 255; // G - olive green  
+          colors[colorIndex + 2] = 107 / 255; // B - olive green
         } else {
-          // MISMATCHED AREA - Pink (RGB: 255, 182, 193 to RGB: 255, 105, 180)
+          // MISMATCHED AREA - Purple/Mauve (RGB: 155, 107, 142 to RGB: 139, 95, 126)
           const intensity = Math.min(deviation / (maxDeviation || 1), 1);
           
-          // Pink gradient colors for mismatched areas
-          const lightPink = { r: 255 / 255, g: 182 / 255, b: 193 / 255 }; // Light pink
-          const hotPink = { r: 255 / 255, g: 105 / 255, b: 180 / 255 };   // Hot pink
+          // Purple/Mauve gradient colors for mismatched areas
+          const lightMauve = { r: 155 / 255, g: 107 / 255, b: 142 / 255 }; // Light mauve
+          const darkMauve = { r: 139 / 255, g: 95 / 255, b: 126 / 255 };   // Dark mauve
           
-          // Interpolate between light pink and hot pink based on intensity
-          colors[colorIndex] = lightPink.r + (hotPink.r - lightPink.r) * intensity;     // R
-          colors[colorIndex + 1] = lightPink.g + (hotPink.g - lightPink.g) * intensity; // G
-          colors[colorIndex + 2] = lightPink.b + (hotPink.b - lightPink.b) * intensity; // B
+          // Interpolate between light mauve and dark mauve based on intensity
+          colors[colorIndex] = lightMauve.r + (darkMauve.r - lightMauve.r) * intensity;     // R
+          colors[colorIndex + 1] = lightMauve.g + (darkMauve.g - lightMauve.g) * intensity; // G
+          colors[colorIndex + 2] = lightMauve.b + (darkMauve.b - lightMauve.b) * intensity; // B
         }
       }
       
@@ -865,7 +865,7 @@ export const STLViewer: React.FC<STLViewerProps> = ({
             
             <div className="flex items-center justify-center gap-8">
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-lg border-2 border-border shadow-sm" style={{backgroundColor: 'rgb(152, 251, 152)'}} />
+                <div className="w-6 h-6 rounded-lg border-2 border-border shadow-sm" style={{backgroundColor: 'rgb(107, 142, 107)'}} />
                 <div className="text-sm">
                   <div className="font-semibold text-foreground">Matched Area</div>
                 </div>
@@ -877,7 +877,7 @@ export const STLViewer: React.FC<STLViewerProps> = ({
                 <div 
                   className="w-6 h-6 rounded-lg border-2 border-border shadow-sm"
                   style={{
-                    background: 'linear-gradient(135deg, rgb(255, 182, 193) 0%, rgb(255, 105, 180) 100%)'
+                    background: 'linear-gradient(135deg, rgb(155, 107, 142) 0%, rgb(139, 95, 126) 100%)'
                   }}
                 />
                 <div className="text-sm">
