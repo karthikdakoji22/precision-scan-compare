@@ -109,20 +109,23 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-surface to-background">
       <Header />
 
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16 max-w-7xl">
+      <main className="container mx-auto px-6 sm:px-8 lg:px-12 py-16 space-y-20 max-w-[1400px]">
         {/* Upload Section */}
-        <section className="space-y-8">
-          <div className="text-center space-y-3">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+        <section className="space-y-10">
+          <div className="text-center space-y-4 max-w-4xl mx-auto">
+            <Badge variant="outline" className="mb-2 px-4 py-1.5 text-xs font-semibold">
+              Step 1: Upload Files
+            </Badge>
+            <h2 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
               Upload STL Files for Analysis
             </h2>
-            <p className="text-muted-foreground max-w-3xl mx-auto text-base sm:text-lg leading-relaxed">
+            <p className="text-muted-foreground max-w-2xl mx-auto text-lg leading-relaxed">
               Upload your reference and query STL files to perform precise superimposition analysis 
               with detailed deviation metrics and visualization.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
             <UploadZone
               title="Reference STL"
               description="Upload the training/reference STL file"
@@ -143,29 +146,41 @@ const Index = () => {
           </div>
 
           {/* Analysis Controls */}
-          <div className="flex justify-center">
-            <Card className="p-8 w-full max-w-lg shadow-lg border-2">
-              <div className="text-center space-y-6">
-                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                  <div className={`w-2 h-2 rounded-full ${referenceFile ? 'bg-success' : 'bg-muted'}`} />
-                  Reference STL
-                  <div className={`w-2 h-2 rounded-full ${queryFile ? 'bg-success' : 'bg-muted'}`} />
-                  Query STL
+          <div className="flex justify-center max-w-6xl mx-auto">
+            <Card className="p-10 w-full max-w-2xl shadow-xl border-2 bg-gradient-card">
+              <div className="text-center space-y-8">
+                <div>
+                  <h3 className="text-xl font-bold text-foreground mb-4">Ready to Analyze</h3>
+                  <div className="flex items-center justify-center gap-6 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full transition-colors ${referenceFile ? 'bg-success animate-pulse' : 'bg-muted'}`} />
+                      <span className={referenceFile ? 'text-foreground font-medium' : 'text-muted-foreground'}>
+                        Reference STL
+                      </span>
+                    </div>
+                    <div className="w-px h-6 bg-border" />
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full transition-colors ${queryFile ? 'bg-success animate-pulse' : 'bg-muted'}`} />
+                      <span className={queryFile ? 'text-foreground font-medium' : 'text-muted-foreground'}>
+                        Query STL
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 
                 <Button
                   onClick={handleStartAnalysis}
                   disabled={!canStartAnalysis}
                   size="lg"
-                  className="w-full btn-medical gap-2"
+                  className="w-full h-14 text-base font-semibold btn-medical gap-3 shadow-lg"
                 >
-                  <Play className="w-5 h-5" />
-                  {isAnalyzing ? 'Analyzing...' : 'Start Superimposition Analysis'}
+                  <Play className="w-6 h-6" />
+                  {isAnalyzing ? 'Analyzing Models...' : 'Start Superimposition Analysis'}
                 </Button>
                 
                 {!canStartAnalysis && !isAnalyzing && (
-                  <p className="text-xs text-muted-foreground">
-                    Upload both STL files to begin analysis
+                  <p className="text-sm text-muted-foreground">
+                    Please upload both STL files to begin analysis
                   </p>
                 )}
               </div>
@@ -175,20 +190,23 @@ const Index = () => {
 
         {/* Visualization Section */}
         {(referenceFile || queryFile) && (
-          <section className="space-y-10">
-            <div className="text-center space-y-3">
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+          <section className="space-y-12">
+            <div className="text-center space-y-4 max-w-4xl mx-auto">
+              <Badge variant="outline" className="mb-2 px-4 py-1.5 text-xs font-semibold">
+                Step 2: Visualize & Analyze
+              </Badge>
+              <h2 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
                 3D Visualization & Results
               </h2>
-              <p className="text-muted-foreground text-base sm:text-lg">
-                Interactive 3D viewer with superimposition analysis
+              <p className="text-muted-foreground text-lg">
+                Interactive 3D viewer with real-time superimposition analysis
               </p>
             </div>
 
             {/* Centered 3D Viewer with Perfect Padding */}
-            <div className="flex justify-center px-4 sm:px-6">
-              <div className="w-full max-w-6xl">
-                <div className="rounded-xl overflow-hidden shadow-2xl border-2 border-border">
+            <div className="flex justify-center">
+              <div className="w-full max-w-[1200px]">
+                <div className="rounded-2xl overflow-hidden shadow-2xl border-2 border-border/50 ring-1 ring-border/20">
                   <STLViewer
                     referenceFile={referenceFile}
                     queryFile={queryFile}
@@ -203,7 +221,7 @@ const Index = () => {
             </div>
 
             {/* Controls and Info Below Viewer - Perfectly Aligned */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-[1200px] mx-auto">
               {/* Viewer Controls */}
               <ViewerControls
                 onReset={handleResetView}
@@ -219,27 +237,30 @@ const Index = () => {
               />
 
               {/* Analysis Status */}
-              <Card className="p-6 bg-card border-2 shadow-lg">
-                <h3 className="font-semibold text-foreground mb-6 text-lg">Analysis Status</h3>
-                <div className="space-y-5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Reference File</span>
-                    <Badge variant={referenceFile ? "default" : "outline"} className="font-medium">
+              <Card className="p-7 bg-gradient-card border-2 shadow-lg">
+                <h3 className="font-semibold text-foreground mb-7 text-lg flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-primary" />
+                  Analysis Status
+                </h3>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-surface/50">
+                    <span className="text-sm font-medium text-muted-foreground">Reference File</span>
+                    <Badge variant={referenceFile ? "default" : "outline"} className="font-semibold">
                       {referenceFile ? "Loaded" : "Pending"}
                     </Badge>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Query File</span>
-                    <Badge variant={queryFile ? "default" : "outline"} className="font-medium">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-surface/50">
+                    <span className="text-sm font-medium text-muted-foreground">Query File</span>
+                    <Badge variant={queryFile ? "default" : "outline"} className="font-semibold">
                       {queryFile ? "Loaded" : "Pending"}
                     </Badge>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Analysis</span>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-surface/50">
+                    <span className="text-sm font-medium text-muted-foreground">Analysis</span>
                     <Badge variant={
                       analysisComplete ? "default" : 
                       isAnalyzing ? "outline" : "secondary"
-                    } className="font-medium">
+                    } className="font-semibold">
                       {analysisComplete ? "Complete" : 
                        isAnalyzing ? "Processing" : "Ready"}
                     </Badge>
@@ -264,13 +285,16 @@ const Index = () => {
 
         {/* Metrics Section */}
         {(analysisComplete || isAnalyzing || (referenceFile && queryFile)) && (
-          <section className="space-y-8 px-4 sm:px-6">
-            <div className="text-center space-y-3">
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+          <section className="space-y-12">
+            <div className="text-center space-y-4 max-w-4xl mx-auto">
+              <Badge variant="outline" className="mb-2 px-4 py-1.5 text-xs font-semibold">
+                Step 3: Review Results
+              </Badge>
+              <h2 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
                 Analysis Metrics & Results
               </h2>
-              <p className="text-muted-foreground text-base sm:text-lg max-w-3xl mx-auto">
-                Detailed quantitative analysis of deviation measurements
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Comprehensive quantitative analysis with detailed deviation measurements
               </p>
             </div>
 

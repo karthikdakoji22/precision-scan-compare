@@ -83,9 +83,9 @@ export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-8">
       {/* Main Similarity Card */}
-      <Card className="p-10 bg-gradient-to-br from-surface to-background">
+      <Card className="p-12 bg-gradient-to-br from-surface via-card to-background border-2 shadow-xl">
         <div className="text-center space-y-6">
           <div className="space-y-2">
             <h3 className="text-2xl font-bold text-foreground">Similarity Analysis</h3>

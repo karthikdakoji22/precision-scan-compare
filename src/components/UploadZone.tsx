@@ -73,11 +73,11 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
   };
 
   return (
-    <Card className="p-6 h-full">
-      <div className="space-y-4 h-full flex flex-col">
+    <Card className="p-7 h-full bg-gradient-card border-2 shadow-lg hover:shadow-xl transition-shadow">
+      <div className="space-y-5 h-full flex flex-col">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <h3 className="text-xl font-bold text-foreground mb-2">{title}</h3>
+          <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
         </div>
 
         {uploadedFile ? (

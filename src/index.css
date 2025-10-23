@@ -9,130 +9,126 @@ All colors MUST be HSL for consistency and theming support.
 @layer base {
   :root {
     /* Core backgrounds and text */
-    --background: 0 0% 100%;
-    --foreground: 210 20% 15%;
-
+    --background: 220 25% 98%;
+    --foreground: 220 20% 12%;
+    
     /* Card and surface colors */
     --card: 0 0% 100%;
-    --card-foreground: 210 20% 15%;
-    --surface: 210 20% 98%;
-    --surface-foreground: 210 20% 25%;
-
+    --card-foreground: 220 20% 12%;
+    --surface: 220 20% 96%;
+    --surface-foreground: 220 20% 12%;
+    
     /* Popover colors */
     --popover: 0 0% 100%;
-    --popover-foreground: 210 20% 15%;
-
-    /* Enhanced Primary brand colors - Professional Blue */
-    --primary: 215 95% 50%;
-    --primary-foreground: 0 0% 100%;
-    --primary-light: 215 90% 60%;
-    --primary-dark: 215 100% 40%;
-    --primary-glow: 215 80% 70%;
-
-    /* Secondary colors - Professional Gray */
-    --secondary: 210 15% 95%;
-    --secondary-foreground: 210 20% 25%;
-
-    /* Muted colors */
-    --muted: 210 15% 96%;
-    --muted-foreground: 210 15% 45%;
-
-    /* Enhanced Accent colors - Professional Teal */
-    --accent: 185 70% 50%;
-    --accent-foreground: 0 0% 100%;
-    --accent-light: 185 65% 60%;
-    --accent-glow: 185 60% 70%;
-
-    /* Status colors */
-    --success: 140 70% 45%;
-    --success-foreground: 0 0% 100%;
-    --warning: 45 90% 55%;
-    --warning-foreground: 0 0% 15%;
-    --destructive: 0 75% 55%;
-    --destructive-foreground: 0 0% 100%;
-
-    /* Enhanced color palette */
-    --apollo-green: 140 85% 65%;      /* Apollo Green for no deviation */
-    --apollo-green-light: 140 75% 85%; /* Light Mint Green for no deviation */
-    --deviation-magenta: 300 50% 41%;  /* Dark Magenta for deviation */
-    --deviation-magenta-dark: 300 55% 33%; /* Darker Magenta for intense deviation */
+    --popover-foreground: 220 20% 12%;
     
-    /* Heatmap colors for deviation analysis */
-    --heatmap-low: 140 75% 85%;       /* Light Mint Green for no deviation */
-    --heatmap-medium: 45 90% 55%;     /* Yellow for medium deviation */
-    --heatmap-high: 300 50% 41%;      /* Dark Magenta for high deviation */
-    --heatmap-critical: 300 55% 33%;  /* Darker Magenta for critical deviation */
-
+    /* Primary - Professional Blue */
+    --primary: 215 85% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 215 85% 45%;
+    
+    /* Secondary - Elegant Gray */
+    --secondary: 220 18% 28%;
+    --secondary-foreground: 0 0% 100%;
+    
+    /* Accent - Highlight color */
+    --accent: 215 90% 55%;
+    --accent-foreground: 0 0% 100%;
+    
+    /* Destructive - Error states */
+    --destructive: 0 72% 52%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Status Colors - Professional palette */
+    --success: 145 65% 42%;
+    --warning: 35 88% 52%;
+    --info: 215 85% 50%;
+    
+    /* UI Elements - Refined */
+    --muted: 220 18% 92%;
+    --muted-foreground: 220 15% 42%;
+    
+    /* Heatmap Colors - Enhanced */
+    --heatmap-low: 145 65% 42%;
+    --heatmap-mid: 35 88% 52%;
+    --heatmap-high: 0 72% 52%;
+    
     /* Border and input colors */
-    --border: 210 20% 88%;
-    --input: 210 20% 96%;
-    --ring: 210 100% 45%;
-
-    /* Radius system */
-    --radius: 0.75rem;
-    --radius-sm: 0.5rem;
-    --radius-lg: 1rem;
-
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(210 20% 0% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(210 20% 0% / 0.1), 0 2px 4px -1px hsl(210 20% 0% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(210 20% 0% / 0.1), 0 4px 6px -2px hsl(210 20% 0% / 0.05);
-    --shadow-xl: 0 20px 25px -5px hsl(210 20% 0% / 0.1), 0 10px 10px -5px hsl(210 20% 0% / 0.04);
-
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
-    --gradient-surface: linear-gradient(180deg, hsl(var(--background)), hsl(var(--surface)));
-    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent-light)));
-
-    /* Animation timing */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-fast: all 0.15s ease-out;
-
+    --border: 220 18% 90%;
+    --input: 220 18% 92%;
+    --ring: 215 85% 50%;
+    
+    /* Radius & Shadows - Professional */
+    --radius: 0.625rem;
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06);
+    --shadow-md: 0 4px 8px -2px rgb(0 0 0 / 0.08);
+    --shadow-lg: 0 12px 20px -4px rgb(0 0 0 / 0.12);
+    --shadow-xl: 0 24px 32px -6px rgb(0 0 0 / 0.15);
+    
+    /* Gradients - Elegant */
+    --gradient-primary: linear-gradient(135deg, hsl(215, 85%, 50%), hsl(215, 90%, 55%));
+    --gradient-surface: linear-gradient(180deg, hsl(220, 25%, 98%), hsl(220, 20%, 96%));
+    --gradient-accent: linear-gradient(135deg, hsl(215, 90%, 55%), hsl(205, 95%, 60%));
+    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 100%), hsl(220, 20%, 99%));
+    
+    /* Transitions - Smooth */
+    --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Sidebar colors */
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --background: 220 28% 9%;
+    --foreground: 220 20% 96%;
+    
+    --card: 220 25% 11%;
+    --card-foreground: 220 20% 96%;
+    
+    --popover: 220 25% 11%;
+    --popover-foreground: 220 20% 96%;
+    
+    --primary: 215 85% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 215 85% 60%;
+    
+    --secondary: 220 20% 22%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --accent: 215 90% 60%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --success: 145 65% 48%;
+    --warning: 35 88% 55%;
+    --info: 215 85% 55%;
+    
+    --muted: 220 22% 16%;
+    --muted-foreground: 220 18% 68%;
+    
+    --heatmap-low: 145 65% 48%;
+    --heatmap-mid: 35 88% 55%;
+    --heatmap-high: 0 72% 55%;
+    
+    --border: 220 22% 20%;
+    --input: 220 22% 20%;
+    --ring: 215 85% 55%;
+    
+    --shadow-sm: 0 2px 4px 0 rgb(0 0 0 / 0.4);
+    --shadow-md: 0 6px 10px -2px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 16px 24px -6px rgb(0 0 0 / 0.6);
+    --shadow-xl: 0 28px 36px -8px rgb(0 0 0 / 0.7);
+    
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -148,33 +144,37 @@ All colors MUST be HSL for consistency and theming support.
   * {
     @apply border-border;
   }
-
+  
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Professional medical/scientific styling */
+  /* Professional styling */
   .glass-effect {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid hsl(var(--border));
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid hsl(var(--border) / 0.5);
   }
 
   .heatmap-gradient {
     background: linear-gradient(90deg, 
       hsl(var(--heatmap-low)) 0%, 
-      hsl(var(--heatmap-medium)) 50%, 
-      hsl(var(--heatmap-high)) 75%,
-      hsl(var(--heatmap-critical)) 100%
+      hsl(var(--heatmap-mid)) 50%, 
+      hsl(var(--heatmap-high)) 100%
     );
   }
 
   /* 3D viewer container styles */
   .viewer-container {
-    background: hsl(var(--surface));
-    border: 1px solid hsl(var(--border));
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
+    background: hsl(var(--card));
+    border: 2px solid hsl(var(--border) / 0.5);
+    border-radius: calc(var(--radius) * 2);
+    box-shadow: var(--shadow-xl);
   }
 
   /* Professional button variants */
@@ -182,50 +182,54 @@ All colors MUST be HSL for consistency and theming support.
     background: var(--gradient-primary);
     color: hsl(var(--primary-foreground));
     border: none;
-    transition: var(--transition-smooth);
+    transition: var(--transition-base);
+    box-shadow: var(--shadow-sm);
   }
 
   .btn-medical:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
   }
 
   /* File upload area styling */
   .upload-zone {
     border: 2px dashed hsl(var(--border));
-    background: hsl(var(--surface));
-    transition: var(--transition-fast);
+    background: var(--gradient-card);
+    transition: var(--transition-smooth);
   }
 
   .upload-zone:hover {
     border-color: hsl(var(--primary));
-    background: hsl(var(--primary) / 0.05);
+    background: hsl(var(--primary) / 0.03);
+    box-shadow: var(--shadow-sm);
   }
 
   .upload-zone.drag-over {
     border-color: hsl(var(--primary));
-    background: hsl(var(--primary) / 0.1);
+    background: hsl(var(--primary) / 0.08);
+    box-shadow: var(--shadow-md);
   }
 
   /* Metrics table styling */
   .metrics-table {
     border-collapse: separate;
     border-spacing: 0;
-    border: 1px solid hsl(var(--border));
+    border: 2px solid hsl(var(--border));
     border-radius: var(--radius);
+    overflow: hidden;
   }
 
   .metrics-table th {
     background: hsl(var(--surface));
     font-weight: 600;
     text-align: left;
-    padding: 12px 16px;
-    border-bottom: 1px solid hsl(var(--border));
+    padding: 14px 18px;
+    border-bottom: 2px solid hsl(var(--border));
   }
 
   .metrics-table td {
-    padding: 12px 16px;
-    border-bottom: 1px solid hsl(var(--border));
+    padding: 14px 18px;
+    border-bottom: 1px solid hsl(var(--border) / 0.5);
   }
 
   .metrics-table tr:last-child td {
