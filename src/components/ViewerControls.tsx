@@ -41,12 +41,12 @@ export const ViewerControls: React.FC<ViewerControlsProps> = ({
   onViewModeChange
 }) => {
   return (
-    <Card className="p-7 space-y-6 border-2 shadow-lg bg-gradient-card">
+    <Card className="p-6 card-professional">
+      <h3 className="font-semibold text-foreground mb-6 text-base flex items-center gap-2">
+        <Settings2 className="w-4 h-4 text-primary" />
+        Viewer Controls
+      </h3>
       <div>
-        <h4 className="font-semibold text-foreground mb-6 text-lg flex items-center gap-2">
-          <Settings2 className="w-5 h-5 text-primary" />
-          Viewer Controls
-        </h4>
         
         {/* View Mode Selection */}
         <div className="space-y-3 mb-6">

@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Upload, FileText, X, CheckCircle } from 'lucide-react';
+import { Upload, FileText, X, CheckCircle, FileUp } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface UploadZoneProps {
@@ -73,13 +73,19 @@ export const UploadZone: React.FC<UploadZoneProps> = ({
   };
 
   return (
-    <Card className="p-7 h-full bg-gradient-card border-2 shadow-lg hover:shadow-xl transition-shadow">
-      <div className="space-y-5 h-full flex flex-col">
-        <div>
-          <h3 className="text-xl font-bold text-foreground mb-2">{title}</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
-        </div>
-
+    <Card className={`relative overflow-hidden transition-all duration-300 ${
+      isDisabled ? 'opacity-50 cursor-not-allowed' : 'card-professional'
+    } ${isDragActive ? 'border-primary bg-primary/5' : 'border-border'}`}>
+      <CardHeader className="pb-5">
+        <CardTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
+          <FileUp className="w-5 h-5 text-primary" />
+          {title}
+        </CardTitle>
+        <CardDescription className="text-sm text-muted-foreground leading-relaxed">
+          {description}
+        </CardDescription>
+      </CardHeader>
+      <div className="px-6 pb-6">
         {uploadedFile ? (
           <div className="flex-1 flex flex-col justify-center">
             <div className="text-center space-y-4">

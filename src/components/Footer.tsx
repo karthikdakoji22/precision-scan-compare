@@ -11,8 +11,8 @@ import {
 
 export const Footer = () => {
   return (
-    <footer className="border-t border-border/50 bg-surface/30 mt-24 backdrop-blur-sm">
-      <div className="container mx-auto px-6 sm:px-8 lg:px-12 py-12 max-w-[1400px]">
+    <footer className="border-t border-border/40 bg-surface/30 mt-24">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-[1400px]">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-3">

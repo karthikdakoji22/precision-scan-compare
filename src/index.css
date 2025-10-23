@@ -8,72 +8,57 @@ All colors MUST be HSL for consistency and theming support.
 
 @layer base {
   :root {
-    /* Core backgrounds and text */
-    --background: 220 25% 98%;
-    --foreground: 220 20% 12%;
-    
-    /* Card and surface colors */
+    /* Light theme - Professional Medical Palette */
+    --background: 210 25% 98%;
+    --foreground: 220 15% 20%;
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 12%;
-    --surface: 220 20% 96%;
-    --surface-foreground: 220 20% 12%;
-    
-    /* Popover colors */
+    --card-foreground: 220 15% 20%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 12%;
-    
-    /* Primary - Professional Blue */
-    --primary: 215 85% 50%;
+    --popover-foreground: 220 15% 20%;
+    --primary: 210 95% 48%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 215 85% 45%;
-    
-    /* Secondary - Elegant Gray */
-    --secondary: 220 18% 28%;
-    --secondary-foreground: 0 0% 100%;
-    
-    /* Accent - Highlight color */
-    --accent: 215 90% 55%;
-    --accent-foreground: 0 0% 100%;
-    
-    /* Destructive - Error states */
-    --destructive: 0 72% 52%;
+    --secondary: 210 30% 94%;
+    --secondary-foreground: 220 15% 20%;
+    --muted: 210 25% 96%;
+    --muted-foreground: 220 10% 50%;
+    --accent: 210 30% 92%;
+    --accent-foreground: 220 15% 20%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
+    --border: 210 20% 90%;
+    --input: 210 20% 92%;
+    --ring: 210 95% 48%;
+    --radius: 0.75rem;
     
-    /* Status Colors - Professional palette */
-    --success: 145 65% 42%;
-    --warning: 35 88% 52%;
-    --info: 215 85% 50%;
+    /* Professional surface colors */
+    --surface: 210 30% 97%;
+    --surface-hover: 210 25% 95%;
     
-    /* UI Elements - Refined */
-    --muted: 220 18% 92%;
-    --muted-foreground: 220 15% 42%;
+    /* Status colors */
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+    --info: 199 89% 48%;
     
-    /* Heatmap Colors - Enhanced */
-    --heatmap-low: 145 65% 42%;
-    --heatmap-mid: 35 88% 52%;
-    --heatmap-high: 0 72% 52%;
+    /* Heatmap colors - Exact match to reference */
+    --heatmap-matched: 94 24% 49%;     /* Olive green rgb(107, 142, 107) */
+    --heatmap-mismatch: 315 18% 51%;   /* Mauve purple rgb(155, 107, 142) */
+    --heatmap-mismatch-dark: 315 18% 45%; /* Darker purple rgb(139, 95, 126) */
     
-    /* Border and input colors */
-    --border: 220 18% 90%;
-    --input: 220 18% 92%;
-    --ring: 215 85% 50%;
+    /* Shadows - Professional depth */
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 8px -2px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 20px -4px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 24px 32px -8px rgba(0, 0, 0, 0.12);
     
-    /* Radius & Shadows - Professional */
-    --radius: 0.625rem;
-    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06);
-    --shadow-md: 0 4px 8px -2px rgb(0 0 0 / 0.08);
-    --shadow-lg: 0 12px 20px -4px rgb(0 0 0 / 0.12);
-    --shadow-xl: 0 24px 32px -6px rgb(0 0 0 / 0.15);
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(210, 95%, 48%), hsl(220, 90%, 55%));
+    --gradient-surface: linear-gradient(180deg, hsl(210, 30%, 99%), hsl(210, 25%, 97%));
+    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 100%), hsl(210, 25%, 98%));
+    --gradient-header: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(210, 30%, 98%));
     
-    /* Gradients - Elegant */
-    --gradient-primary: linear-gradient(135deg, hsl(215, 85%, 50%), hsl(215, 90%, 55%));
-    --gradient-surface: linear-gradient(180deg, hsl(220, 25%, 98%), hsl(220, 20%, 96%));
-    --gradient-accent: linear-gradient(135deg, hsl(215, 90%, 55%), hsl(205, 95%, 60%));
-    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 100%), hsl(220, 20%, 99%));
-    
-    /* Transitions - Smooth */
-    --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-smooth: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Transitions */
+    --transition-smooth: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     
     /* Sidebar colors */
     --sidebar-background: 0 0% 98%;
@@ -87,47 +72,41 @@ All colors MUST be HSL for consistency and theming support.
   }
 
   .dark {
-    --background: 220 28% 9%;
-    --foreground: 220 20% 96%;
-    
-    --card: 220 25% 11%;
-    --card-foreground: 220 20% 96%;
-    
-    --popover: 220 25% 11%;
-    --popover-foreground: 220 20% 96%;
-    
-    --primary: 215 85% 55%;
+    --background: 220 20% 12%;
+    --foreground: 210 30% 96%;
+    --card: 220 18% 15%;
+    --card-foreground: 210 30% 96%;
+    --popover: 220 18% 15%;
+    --popover-foreground: 210 30% 96%;
+    --primary: 210 95% 52%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 215 85% 60%;
-    
-    --secondary: 220 20% 22%;
-    --secondary-foreground: 0 0% 100%;
-    
-    --accent: 215 90% 60%;
-    --accent-foreground: 0 0% 100%;
-    
-    --destructive: 0 72% 55%;
+    --secondary: 220 15% 20%;
+    --secondary-foreground: 210 30% 96%;
+    --muted: 220 15% 18%;
+    --muted-foreground: 210 15% 60%;
+    --accent: 220 15% 22%;
+    --accent-foreground: 210 30% 96%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
+    --border: 220 15% 22%;
+    --input: 220 15% 20%;
+    --ring: 210 95% 52%;
     
-    --success: 145 65% 48%;
-    --warning: 35 88% 55%;
-    --info: 215 85% 55%;
+    --surface: 220 18% 16%;
+    --surface-hover: 220 15% 20%;
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+    --info: 199 89% 48%;
     
-    --muted: 220 22% 16%;
-    --muted-foreground: 220 18% 68%;
+    /* Heatmap colors - Same for consistency */
+    --heatmap-matched: 94 24% 49%;
+    --heatmap-mismatch: 315 18% 51%;
+    --heatmap-mismatch-dark: 315 18% 45%;
     
-    --heatmap-low: 145 65% 48%;
-    --heatmap-mid: 35 88% 55%;
-    --heatmap-high: 0 72% 55%;
-    
-    --border: 220 22% 20%;
-    --input: 220 22% 20%;
-    --ring: 215 85% 55%;
-    
-    --shadow-sm: 0 2px 4px 0 rgb(0 0 0 / 0.4);
-    --shadow-md: 0 6px 10px -2px rgb(0 0 0 / 0.5);
-    --shadow-lg: 0 16px 24px -6px rgb(0 0 0 / 0.6);
-    --shadow-xl: 0 28px 36px -8px rgb(0 0 0 / 0.7);
+    --gradient-primary: linear-gradient(135deg, hsl(210, 95%, 45%), hsl(220, 90%, 52%));
+    --gradient-surface: linear-gradient(180deg, hsl(220, 18%, 16%), hsl(220, 20%, 12%));
+    --gradient-card: linear-gradient(145deg, hsl(220, 18%, 15%), hsl(220, 18%, 17%));
+    --gradient-header: linear-gradient(180deg, hsl(220, 18%, 15%), hsl(220, 18%, 14%));
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -146,93 +125,83 @@ All colors MUST be HSL for consistency and theming support.
   }
   
   body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-variation-settings: normal;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
-  /* Professional styling */
-  .glass-effect {
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid hsl(var(--border) / 0.5);
-  }
+/* Custom utility classes - Professional Medical Design */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(210, 220, 230, 0.5);
+  box-shadow: var(--shadow-lg);
+}
 
-  .heatmap-gradient {
-    background: linear-gradient(90deg, 
-      hsl(var(--heatmap-low)) 0%, 
-      hsl(var(--heatmap-mid)) 50%, 
-      hsl(var(--heatmap-high)) 100%
-    );
-  }
+.heatmap-gradient {
+  background: linear-gradient(90deg, 
+    hsl(var(--heatmap-matched)) 0%, 
+    hsl(var(--heatmap-mismatch)) 100%
+  );
+}
 
-  /* 3D viewer container styles */
-  .viewer-container {
-    background: hsl(var(--card));
-    border: 2px solid hsl(var(--border) / 0.5);
-    border-radius: calc(var(--radius) * 2);
-    box-shadow: var(--shadow-xl);
-  }
+.viewer-container {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: var(--shadow-xl);
+}
 
-  /* Professional button variants */
-  .btn-medical {
-    background: var(--gradient-primary);
-    color: hsl(var(--primary-foreground));
-    border: none;
-    transition: var(--transition-base);
-    box-shadow: var(--shadow-sm);
-  }
+.btn-medical {
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: var(--transition-smooth);
+  box-shadow: var(--shadow-md);
+}
 
-  .btn-medical:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-  }
+.btn-medical:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+  filter: brightness(1.05);
+}
 
-  /* File upload area styling */
-  .upload-zone {
-    border: 2px dashed hsl(var(--border));
-    background: var(--gradient-card);
-    transition: var(--transition-smooth);
-  }
+.btn-medical:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
-  .upload-zone:hover {
-    border-color: hsl(var(--primary));
-    background: hsl(var(--primary) / 0.03);
-    box-shadow: var(--shadow-sm);
-  }
+.upload-zone {
+  transition: var(--transition-smooth);
+  border: 2px dashed hsl(var(--border));
+  background: hsl(var(--surface));
+}
 
-  .upload-zone.drag-over {
-    border-color: hsl(var(--primary));
-    background: hsl(var(--primary) / 0.08);
-    box-shadow: var(--shadow-md);
-  }
+.upload-zone:hover:not(.disabled) {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--accent));
+  box-shadow: var(--shadow-md);
+}
 
-  /* Metrics table styling */
-  .metrics-table {
-    border-collapse: separate;
-    border-spacing: 0;
-    border: 2px solid hsl(var(--border));
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
+.metrics-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
 
-  .metrics-table th {
-    background: hsl(var(--surface));
-    font-weight: 600;
-    text-align: left;
-    padding: 14px 18px;
-    border-bottom: 2px solid hsl(var(--border));
-  }
+/* Professional card styles */
+.card-professional {
+  background: var(--gradient-card);
+  border: 1px solid hsl(var(--border));
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-smooth);
+}
 
-  .metrics-table td {
-    padding: 14px 18px;
-    border-bottom: 1px solid hsl(var(--border) / 0.5);
-  }
-
-  .metrics-table tr:last-child td {
-    border-bottom: none;
-  }
+.card-professional:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+}
 }
